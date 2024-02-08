@@ -5,12 +5,11 @@ import { useCallback, useState } from 'react';
 import { DataFormattedType } from './Types';
 
 interface Props {
-  grayScaleData: DataFormattedType[];
   mineralData: [DataFormattedType[], DataFormattedType[], DataFormattedType[]];
 }
 
 export default function BoxView(props: Props) {
-  const { grayScaleData, mineralData } = props;
+  const { mineralData } = props;
 
   const INITIAL_VIEW_STATE = {
     target: [0, 0],
@@ -18,15 +17,7 @@ export default function BoxView(props: Props) {
   };
   const layers = [
     new ScatterplotLayer({
-      id: 'layer-for-top-left',
-      data: grayScaleData,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      getRadius: 0.05,
-      pickable: true,
-    }),
-    new ScatterplotLayer({
-      id: 'layer-for-top-right',
+      id: 'layer-for-top',
       data: mineralData[0],
       getPosition: d => d.position,
       getFillColor: d => d.color,
@@ -34,7 +25,7 @@ export default function BoxView(props: Props) {
       pickable: true,
     }),
     new ScatterplotLayer({
-      id: 'layer-for-bottom-left',
+      id: 'layer-for-middle',
       data: mineralData[1],
       getPosition: d => d.position,
       getFillColor: d => d.color,
@@ -42,7 +33,7 @@ export default function BoxView(props: Props) {
       pickable: true,
     }),
     new ScatterplotLayer({
-      id: 'layer-for-bottom-right',
+      id: 'layer-for-bottom',
       data: mineralData[2],
       getPosition: d => d.position,
       getFillColor: d => d.color,
@@ -52,53 +43,41 @@ export default function BoxView(props: Props) {
   ];
   const views = [
     new OrthographicView({
-      id: 'top-left',
+      id: 'top',
       x: '0%',
       y: '0%',
-      width: '50%',
-      height: '50%',
+      width: '100%',
+      height: '33.33%',
       controller: true,
     }),
     new OrthographicView({
-      id: 'top-right',
-      x: '50%',
-      y: '0%',
-      width: '50%',
-      height: '50%',
-      controller: true,
-    }),
-    new OrthographicView({
-      id: 'bottom-left',
+      id: 'middle',
       x: '0%',
-      y: '50%',
-      width: '50%',
-      height: '50%',
+      y: '33.33%',
+      width: '100%',
+      height: '33.33%',
       controller: true,
     }),
     new OrthographicView({
-      id: 'bottom-right',
-      x: '50%',
-      y: '50%',
-      width: '50%',
-      height: '50%',
+      id: 'bottom',
+      x: '0%',
+      y: '66.66%',
+      width: '100%',
+      height: '33.37%',
       controller: true,
     }),
   ];
 
   const [viewStates, setViewStates] = useState({
-    'top-right': {
+    top: {
       target: [0, 0],
       zoom: 2,
     },
-    'top-left': {
+    middle: {
       target: [0, 0],
       zoom: 2,
     },
-    'bottom-right': {
-      target: [0, 0],
-      zoom: 2,
-    },
-    'bottom-left': {
+    bottom: {
       target: [0, 0],
       zoom: 2,
     },
@@ -107,10 +86,9 @@ export default function BoxView(props: Props) {
   const onViewStateChange = useCallback((d: any) => {
     const { viewState } = d;
     setViewStates({
-      'top-right': viewState,
-      'top-left': viewState,
-      'bottom-right': viewState,
-      'bottom-left': viewState,
+      top: viewState,
+      middle: viewState,
+      bottom: viewState,
     });
   }, []);
   return (

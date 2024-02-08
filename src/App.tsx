@@ -20,12 +20,12 @@ const FORMAT_DATA = (
   const regex = /rgb\((\d+), (\d+), (\d+)\)/;
   const formattedData: DataFormattedType[] = data.data.map((d, i) => ({
     position: new Float32Array([
-      ((i % grayScaleData.res_y) - grayScaleData.res_x / 2) * 0.1,
-      (Math.floor(i / grayScaleData.res_y) - grayScaleData.res_y / 2) * 0.1,
+      ((i % data.res_y) - data.res_x / 2) * 0.1,
+      (Math.floor(i / data.res_y) - data.res_x / 2) * 0.1,
     ]),
     value: new Float32Array([d]),
     color:
-      d === -1
+      d === -1 || colors[0] === '#212121'
         ? new Float32Array([
             grayScaleColorScale(grayScaleData.data[i]),
             grayScaleColorScale(grayScaleData.data[i]),
@@ -73,13 +73,16 @@ const FORMAT_DATA = (
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const COLOR_SCALES: any = {
+  GrayScale: ['#212121', '#F1F1F1'],
   Aluminum: ['#eff3ff', '#08519c'],
   Copper: ['#edf8e9', '#006d2c'],
   Iron: ['#feedde', '#a63603'],
 };
 
 export default function App() {
-  const [openMenu, setOpenMenu] = useState(true);
+  const [openMenu1, setOpenMenu1] = useState(true);
+  const [openMenu2, setOpenMenu2] = useState(true);
+  const [openMenu3, setOpenMenu3] = useState(true);
   const [grayScaleData, setGrayScaleData] = useState<
     DataFormattedType[] | undefined
   >(undefined);
@@ -105,7 +108,7 @@ export default function App() {
     DataFormattedType[] | undefined
   >(undefined);
   const [mineral1Settings, setMineral1Settings] = useState({
-    name: 'Aluminum',
+    name: 'GrayScale',
     threshold: 1,
   });
   const [mineral2Settings, setMineral2Settings] = useState({
@@ -119,7 +122,7 @@ export default function App() {
   const grayScaleColorScale = scaleLinear().domain([0, 1]).range([20, 245]);
   useEffect(() => {
     queue()
-      .defer(json, './data/Grayscale.json')
+      .defer(json, './data/GrayScale.json')
       .defer(json, `./data/${mineral1Settings.name}.json`)
       .defer(json, `./data/${mineral2Settings.name}.json`)
       .defer(json, `./data/${mineral3Settings.name}.json`)
@@ -255,15 +258,23 @@ export default function App() {
               position: 'fixed',
               zIndex: 10,
               width: '280px',
-              maxHeight: '80vh',
-              top: '24px',
+              maxHeight: 'calc(33.33vh - 48px)',
+              top: '0',
+              marginTop: '24px',
               left: '24px',
               backgroundColor: 'rgba(255, 255, 2255, 0.95)',
               color: '#1D2223',
               fontFamily: 'Roboto, sans-serif',
             }}
           >
-            <div style={{ padding: '1rem' }}>
+            <div
+              style={{
+                padding: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+              }}
+            >
               <div
                 style={{
                   display: 'flex',
@@ -271,43 +282,34 @@ export default function App() {
                   alignItems: 'center',
                 }}
               >
-                <h4
+                <h5
                   style={{
                     fontWeight: '700',
-                    fontSize: '1.5rem',
+                    fontSize: '1rem',
                     margin: '0',
                   }}
                 >
                   Settings
-                </h4>
-                {openMenu ? (
+                </h5>
+                {openMenu1 ? (
                   <X
                     strokeWidth={1}
                     onClick={() => {
-                      setOpenMenu(false);
+                      setOpenMenu1(false);
                     }}
                   />
                 ) : (
                   <Plus
                     strokeWidth={1}
                     onClick={() => {
-                      setOpenMenu(true);
+                      setOpenMenu1(true);
                     }}
                   />
                 )}
               </div>
-              {openMenu ? (
+              {openMenu1 ? (
                 <>
-                  <div style={{ margin: '1.5rem 0' }}>
-                    <h5
-                      style={{
-                        fontWeight: '700',
-                        fontSize: '1rem',
-                        marginBottom: '1.5rem',
-                      }}
-                    >
-                      Box 2
-                    </h5>
+                  <div>
                     <p
                       style={{
                         fontSize: '0.75rem',
@@ -319,20 +321,26 @@ export default function App() {
                       Select element or mineral
                     </p>
                     <Select
-                      style={{ width: '100%', marginBottom: '1.5rem' }}
+                      style={{ width: '100%' }}
                       defaultValue={mineral1Settings.name}
                       options={[
+                        { value: 'GrayScale', label: 'GrayScale' },
                         { value: 'Aluminum', label: 'Aluminum' },
                         { value: 'Copper', label: 'Copper' },
                         { value: 'Iron', label: 'Iron' },
                       ]}
                       onChange={d => {
-                        setMineral1Settings({ ...mineral1Settings, name: d });
+                        setMineral1Settings({
+                          ...mineral1Settings,
+                          name: d || 'GrayScale',
+                        });
                       }}
                       dropdownStyle={{
                         borderRadius: 0,
                       }}
                     />
+                  </div>
+                  <div>
                     <p
                       style={{
                         fontSize: '0.75rem',
@@ -354,6 +362,7 @@ export default function App() {
                           threshold: d,
                         });
                       }}
+                      disabled={mineral1Settings.name === 'GrayScale'}
                       styles={{
                         track: {
                           background: 'transparent',
@@ -362,17 +371,67 @@ export default function App() {
                       }}
                     />
                   </div>
-                  <hr style={{ opacity: 0.25 }} />
-                  <div style={{ margin: '1.5rem 0' }}>
-                    <h5
-                      style={{
-                        fontWeight: '700',
-                        fontSize: '1rem',
-                        marginBottom: '1.5rem',
-                      }}
-                    >
-                      Box 3
-                    </h5>
+                </>
+              ) : null}
+            </div>
+          </div>
+          <div
+            style={{
+              position: 'fixed',
+              zIndex: 10,
+              width: '280px',
+              maxHeight: 'calc(33.33vh - 48px)',
+              top: '33.33%',
+              marginTop: '24px',
+              left: '24px',
+              backgroundColor: 'rgba(255, 255, 2255, 0.95)',
+              color: '#1D2223',
+              fontFamily: 'Roboto, sans-serif',
+            }}
+          >
+            <div
+              style={{
+                padding: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <h5
+                  style={{
+                    fontWeight: '700',
+                    fontSize: '1rem',
+                    margin: '0',
+                  }}
+                >
+                  Settings
+                </h5>
+                {openMenu2 ? (
+                  <X
+                    strokeWidth={1}
+                    onClick={() => {
+                      setOpenMenu2(false);
+                    }}
+                  />
+                ) : (
+                  <Plus
+                    strokeWidth={1}
+                    onClick={() => {
+                      setOpenMenu2(true);
+                    }}
+                  />
+                )}
+              </div>
+              {openMenu2 ? (
+                <>
+                  <div>
                     <p
                       style={{
                         fontSize: '0.75rem',
@@ -384,20 +443,26 @@ export default function App() {
                       Select element or mineral
                     </p>
                     <Select
-                      style={{ width: '100%', marginBottom: '1.5rem' }}
+                      style={{ width: '100%' }}
                       defaultValue={mineral2Settings.name}
                       options={[
+                        { value: 'GrayScale', label: 'GrayScale' },
                         { value: 'Aluminum', label: 'Aluminum' },
                         { value: 'Copper', label: 'Copper' },
                         { value: 'Iron', label: 'Iron' },
                       ]}
                       onChange={d => {
-                        setMineral2Settings({ ...mineral2Settings, name: d });
+                        setMineral2Settings({
+                          ...mineral2Settings,
+                          name: d || 'GrayScale',
+                        });
                       }}
                       dropdownStyle={{
                         borderRadius: 0,
                       }}
                     />
+                  </div>
+                  <div>
                     <p
                       style={{
                         fontSize: '0.75rem',
@@ -419,6 +484,7 @@ export default function App() {
                           threshold: d,
                         });
                       }}
+                      disabled={mineral2Settings.name === 'GrayScale'}
                       styles={{
                         track: {
                           background: 'transparent',
@@ -427,17 +493,67 @@ export default function App() {
                       }}
                     />
                   </div>
-                  <hr style={{ opacity: 0.25 }} />
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <h5
-                      style={{
-                        fontWeight: '700',
-                        fontSize: '1rem',
-                        marginBottom: '1.5rem',
-                      }}
-                    >
-                      Box 4
-                    </h5>
+                </>
+              ) : null}
+            </div>
+          </div>
+          <div
+            style={{
+              position: 'fixed',
+              zIndex: 10,
+              width: '280px',
+              maxHeight: 'calc(33.33vh - 48px)',
+              top: '66.66%',
+              marginTop: '24px',
+              left: '24px',
+              backgroundColor: 'rgba(255, 255, 2255, 0.95)',
+              color: '#1D2223',
+              fontFamily: 'Roboto, sans-serif',
+            }}
+          >
+            <div
+              style={{
+                padding: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <h5
+                  style={{
+                    fontWeight: '700',
+                    fontSize: '1rem',
+                    margin: '0',
+                  }}
+                >
+                  Settings
+                </h5>
+                {openMenu3 ? (
+                  <X
+                    strokeWidth={1}
+                    onClick={() => {
+                      setOpenMenu3(false);
+                    }}
+                  />
+                ) : (
+                  <Plus
+                    strokeWidth={1}
+                    onClick={() => {
+                      setOpenMenu3(true);
+                    }}
+                  />
+                )}
+              </div>
+              {openMenu3 ? (
+                <>
+                  <div>
                     <p
                       style={{
                         fontSize: '0.75rem',
@@ -449,20 +565,26 @@ export default function App() {
                       Select element or mineral
                     </p>
                     <Select
-                      style={{ width: '100%', marginBottom: '1.5rem' }}
+                      style={{ width: '100%' }}
                       defaultValue={mineral3Settings.name}
                       options={[
+                        { value: 'GrayScale', label: 'GrayScale' },
                         { value: 'Aluminum', label: 'Aluminum' },
                         { value: 'Copper', label: 'Copper' },
                         { value: 'Iron', label: 'Iron' },
                       ]}
                       onChange={d => {
-                        setMineral3Settings({ ...mineral3Settings, name: d });
+                        setMineral3Settings({
+                          ...mineral3Settings,
+                          name: d || 'GrayScale',
+                        });
                       }}
                       dropdownStyle={{
                         borderRadius: 0,
                       }}
                     />
+                  </div>
+                  <div>
                     <p
                       style={{
                         fontSize: '0.75rem',
@@ -484,6 +606,7 @@ export default function App() {
                           threshold: d,
                         });
                       }}
+                      disabled={mineral3Settings.name === 'GrayScale'}
                       styles={{
                         track: {
                           background: 'transparent',
@@ -496,10 +619,33 @@ export default function App() {
               ) : null}
             </div>
           </div>
-          <BoxView
-            grayScaleData={grayScaleData}
-            mineralData={[mineral1Data, mineral2Data, mineral3Data]}
+          <div
+            style={{
+              width: '100%',
+              height: '33.33%',
+              top: 0,
+              left: 0,
+              position: 'fixed',
+              backgroundColor: 'transparent',
+              borderBottom: '1px solid rgba(255,255,255,0.25)',
+              zIndex: 10,
+              pointerEvents: 'none',
+            }}
           />
+          <div
+            style={{
+              width: '100%',
+              height: '33.33%',
+              bottom: 0,
+              left: 0,
+              position: 'fixed',
+              backgroundColor: 'transparent',
+              borderTop: '1px solid rgba(255,255,255,0.25)',
+              zIndex: 10,
+              pointerEvents: 'none',
+            }}
+          />
+          <BoxView mineralData={[mineral1Data, mineral2Data, mineral3Data]} />
         </>
       ) : (
         <Spin tip='Loading' size='large' />

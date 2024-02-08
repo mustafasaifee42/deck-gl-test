@@ -10,3 +10,8 @@ export interface DataFormattedType {
   value: Float32Array;
   type: 'pointCloud' | 'mineral';
 }
+
+export interface MineralSettingsDataType {
+  name: string;
+  threshold: number;
+}
