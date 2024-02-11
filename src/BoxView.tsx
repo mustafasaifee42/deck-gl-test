@@ -1,44 +1,91 @@
 import DeckGL from '@deck.gl/react/typed';
-import { ScatterplotLayer } from '@deck.gl/layers/typed';
+import { GridCellLayer } from '@deck.gl/layers/typed';
 import { OrthographicView } from '@deck.gl/core/typed';
 import { useCallback, useState } from 'react';
-import { DataFormattedType } from './Types';
+import { MineralDataType } from './Types';
 
 interface Props {
-  mineralData: [DataFormattedType[], DataFormattedType[], DataFormattedType[]];
+  mineralData: [MineralDataType, MineralDataType, MineralDataType];
 }
 
 export default function BoxView(props: Props) {
   const { mineralData } = props;
 
+  const [viewStates, setViewStates] = useState({
+    top: {
+      target: [0, 0],
+      zoom: 2,
+    },
+    middle: {
+      target: [0, 0],
+      zoom: 2,
+    },
+    bottom: {
+      target: [0, 0],
+      zoom: 2,
+    },
+  });
   const INITIAL_VIEW_STATE = {
     target: [0, 0],
     zoom: 2,
   };
   const layers = [
-    new ScatterplotLayer({
+    new GridCellLayer({
       id: 'layer-for-top',
-      data: mineralData[0],
+      data: mineralData[0].fullData,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      getRadius: 0.05,
+      cellSize: 0.1,
       pickable: true,
+      fp64: false,
+      visible: viewStates.top.zoom > 5,
     }),
-    new ScatterplotLayer({
+    new GridCellLayer({
       id: 'layer-for-middle',
-      data: mineralData[1],
+      data: mineralData[1].fullData,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      getRadius: 0.05,
+      cellSize: 0.1,
       pickable: true,
+      fp64: false,
+      visible: viewStates.top.zoom > 5,
     }),
-    new ScatterplotLayer({
+    new GridCellLayer({
       id: 'layer-for-bottom',
-      data: mineralData[2],
+      data: mineralData[2].fullData,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      getRadius: 0.05,
+      cellSize: 0.1,
       pickable: true,
+      fp64: false,
+      visible: viewStates.top.zoom > 5,
+    }),
+    new GridCellLayer({
+      id: 'down-sampled-layer-for-top',
+      data: mineralData[0].downSampledData,
+      getPosition: d => d.position,
+      getFillColor: d => d.color,
+      cellSize: 0.2,
+      pickable: true,
+      visible: viewStates.top.zoom <= 5,
+    }),
+    new GridCellLayer({
+      id: 'down-sampled-layer-for-middle',
+      data: mineralData[1].downSampledData,
+      getPosition: d => d.position,
+      getFillColor: d => d.color,
+      cellSize: 0.2,
+      pickable: true,
+      visible: viewStates.top.zoom <= 5,
+    }),
+    new GridCellLayer({
+      id: 'down-sampled-layer-for-bottom',
+      data: mineralData[2].downSampledData,
+      getPosition: d => d.position,
+      getFillColor: d => d.color,
+      cellSize: 0.2,
+      pickable: true,
+      visible: viewStates.top.zoom <= 5,
     }),
   ];
   const views = [
@@ -67,21 +114,6 @@ export default function BoxView(props: Props) {
       controller: true,
     }),
   ];
-
-  const [viewStates, setViewStates] = useState({
-    top: {
-      target: [0, 0],
-      zoom: 2,
-    },
-    middle: {
-      target: [0, 0],
-      zoom: 2,
-    },
-    bottom: {
-      target: [0, 0],
-      zoom: 2,
-    },
-  });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onViewStateChange = useCallback((d: any) => {
     const { viewState } = d;
@@ -100,13 +132,17 @@ export default function BoxView(props: Props) {
       layers={layers}
       pickingRadius={10}
       layerFilter={({ layer, viewport }) => {
-        return layer.id === `layer-for-${viewport.id}`;
+        return (
+          layer.id === `layer-for-${viewport.id}` ||
+          layer.id === `down-sampled-layer-for-${viewport.id}`
+        );
       }}
       onViewStateChange={onViewStateChange}
       getTooltip={({ object }) => {
         if (object?.type === 'mineral') return `${object.value[0].toFixed(2)}`;
         return null;
       }}
+      useDevicePixels={false}
     />
   );
 }

@@ -11,6 +11,11 @@ export interface DataFormattedType {
   type: 'pointCloud' | 'mineral';
 }
 
+export interface MineralDataType {
+  downSampledData: DataFormattedType[];
+  fullData: DataFormattedType[];
+}
+
 export interface MineralSettingsDataType {
   name: string;
   threshold: number;

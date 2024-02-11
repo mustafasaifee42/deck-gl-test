@@ -4,7 +4,9 @@ import { scaleLinear } from 'd3-scale';
 import { queue } from 'd3-queue';
 import { json } from 'd3-request';
 import { Plus, X } from 'lucide-react';
-import { DataFormattedType, DataType } from './Types';
+import chunk from 'lodash.chunk';
+import flatten from 'lodash.flatten';
+import { DataFormattedType, DataType, MineralDataType } from './Types';
 import BoxView from './BoxView';
 
 const FORMAT_DATA = (
@@ -12,63 +14,76 @@ const FORMAT_DATA = (
   grayScaleData: DataType,
   thresholdValue: number,
   colors: [string, string],
+  gridSize?: number,
 ) => {
   const grayScaleColorScale = scaleLinear().domain([0, 1]).range([20, 245]);
   const elementColorScale = scaleLinear<string, string>()
     .domain([0, thresholdValue])
     .range(colors);
   const regex = /rgb\((\d+), (\d+), (\d+)\)/;
-  const formattedData: DataFormattedType[] = data.data.map((d, i) => ({
-    position: new Float32Array([
-      ((i % data.res_y) - data.res_x / 2) * 0.1,
-      (Math.floor(i / data.res_y) - data.res_x / 2) * 0.1,
-    ]),
-    value: new Float32Array([d]),
-    color:
+  const formattedData: DataFormattedType[] = [];
+
+  const grayScaleColorScaleCache = grayScaleData.data.map(value =>
+    grayScaleColorScale(value),
+  );
+  const thresholdColor = elementColorScale(thresholdValue);
+  const thresholdColorMatches = thresholdColor.match(regex) as string[];
+
+  data.data.forEach((d, i) => {
+    const grayScaleValue = grayScaleColorScaleCache[i];
+    const color =
       d === -1 || colors[0] === '#212121'
-        ? new Float32Array([
-            grayScaleColorScale(grayScaleData.data[i]),
-            grayScaleColorScale(grayScaleData.data[i]),
-            grayScaleColorScale(grayScaleData.data[i]),
-          ])
+        ? [grayScaleValue, grayScaleValue, grayScaleValue]
         : d > thresholdValue
-        ? new Float32Array([
-            parseInt(
-              (
-                elementColorScale(thresholdValue).match(regex) as string[]
-              )[1] as string,
-              10,
-            ),
-            parseInt(
-              (
-                elementColorScale(thresholdValue).match(regex) as string[]
-              )[2] as string,
-              10,
-            ),
-            parseInt(
-              (
-                elementColorScale(thresholdValue).match(regex) as string[]
-              )[3] as string,
-              10,
-            ),
-          ])
-        : new Float32Array([
-            parseInt(
-              (elementColorScale(d).match(regex) as string[])[1] as string,
-              10,
-            ),
-            parseInt(
-              (elementColorScale(d).match(regex) as string[])[2] as string,
-              10,
-            ),
-            parseInt(
-              (elementColorScale(d).match(regex) as string[])[3] as string,
-              10,
-            ),
-          ]),
-    type: d === -1 ? 'pointCloud' : 'mineral',
-  }));
+        ? [
+            parseInt(thresholdColorMatches[1], 10),
+            parseInt(thresholdColorMatches[2], 10),
+            parseInt(thresholdColorMatches[3], 10),
+          ]
+        : [
+            parseInt((elementColorScale(d).match(regex) as string[])[1], 10),
+            parseInt((elementColorScale(d).match(regex) as string[])[2], 10),
+            parseInt((elementColorScale(d).match(regex) as string[])[3], 10),
+          ];
+
+    formattedData.push({
+      position: new Float32Array([
+        ((i % data.res_y) - data.res_x / 2) * (gridSize || 0.1),
+        (Math.floor(i / data.res_y) - data.res_x / 2) * (gridSize || 0.1),
+      ]),
+      value: new Float32Array([d]),
+      color: new Float32Array(color),
+      type: d === -1 ? 'pointCloud' : 'mineral',
+    });
+  });
+
   return formattedData;
+};
+
+const downsampleArray = (array2D: number[][], blockSize: number) => {
+  const downsampledArray = [];
+  const numRows = Math.floor(array2D.length / blockSize);
+  const numCols = Math.floor(array2D[0].length / blockSize);
+
+  for (let i = 0; i < numRows; i += 1) {
+    const rowStart = i * blockSize;
+    const rowEnd = rowStart + blockSize;
+
+    for (let j = 0; j < numCols; j += 1) {
+      const colStart = j * blockSize;
+      const colEnd = colStart + blockSize;
+
+      let sum = 0;
+      for (let x = rowStart; x < rowEnd; x += 1) {
+        for (let y = colStart; y < colEnd; y += 1) {
+          sum += array2D[x][y];
+        }
+      }
+      const average = sum / (blockSize * blockSize);
+      downsampledArray.push(average);
+    }
+  }
+  return chunk(downsampledArray, numCols);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,10 +98,10 @@ export default function App() {
   const [openMenu1, setOpenMenu1] = useState(true);
   const [openMenu2, setOpenMenu2] = useState(true);
   const [openMenu3, setOpenMenu3] = useState(true);
-  const [grayScaleData, setGrayScaleData] = useState<
-    DataFormattedType[] | undefined
-  >(undefined);
   const [grayScaleDataFromFile, setGrayScaleDataFromFile] = useState<
+    DataType | undefined
+  >(undefined);
+  const [grayScaleDataDownSampled, setGrayScaleDataDownSampled] = useState<
     DataType | undefined
   >(undefined);
   const [mineral1DataFromFile, setMineral1DataFromFile] = useState<
@@ -98,15 +113,18 @@ export default function App() {
   const [mineral3DataFromFile, setMineral3DataFromFile] = useState<
     DataType | undefined
   >(undefined);
-  const [mineral1Data, setMineral1Data] = useState<
-    DataFormattedType[] | undefined
+  const [grayScaleData, setGrayScaleData] = useState<
+    MineralDataType | undefined
   >(undefined);
-  const [mineral2Data, setMineral2Data] = useState<
-    DataFormattedType[] | undefined
-  >(undefined);
-  const [mineral3Data, setMineral3Data] = useState<
-    DataFormattedType[] | undefined
-  >(undefined);
+  const [mineral1Data, setMineral1Data] = useState<MineralDataType | undefined>(
+    undefined,
+  );
+  const [mineral2Data, setMineral2Data] = useState<MineralDataType | undefined>(
+    undefined,
+  );
+  const [mineral3Data, setMineral3Data] = useState<MineralDataType | undefined>(
+    undefined,
+  );
   const [mineral1Settings, setMineral1Settings] = useState({
     name: 'GrayScale',
     threshold: 1,
@@ -150,8 +168,35 @@ export default function App() {
               ]),
               type: 'pointCloud',
             }));
-          setGrayScaleData(grayScaleDataFormatted);
+          const downSampledData: DataType = {
+            res_x: Math.floor(grayScale.res_x / 2),
+            res_y: Math.floor(grayScale.res_y / 2),
+            data: flatten(
+              downsampleArray(chunk(grayScale.data, grayScale.res_y), 2),
+            ),
+          };
+          const grayScaleDataDownSampledFormatted: DataFormattedType[] =
+            downSampledData.data.map((d, i) => ({
+              position: new Float32Array([
+                ((i % downSampledData.res_y) - downSampledData.res_x / 2) * 0.1,
+                (Math.floor(i / downSampledData.res_y) -
+                  downSampledData.res_y / 2) *
+                  0.1,
+              ]),
+              value: new Float32Array([d]),
+              color: new Float32Array([
+                grayScaleColorScale(d),
+                grayScaleColorScale(d),
+                grayScaleColorScale(d),
+              ]),
+              type: 'pointCloud',
+            }));
+          setGrayScaleData({
+            downSampledData: grayScaleDataDownSampledFormatted,
+            fullData: grayScaleDataFormatted,
+          });
           setGrayScaleDataFromFile(grayScale);
+          setGrayScaleDataDownSampled(downSampledData);
           setMineral1DataFromFile(mineral_1);
           setMineral2DataFromFile(mineral_2);
           setMineral3DataFromFile(mineral_3);
@@ -160,41 +205,104 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (mineral1DataFromFile && grayScaleDataFromFile) {
-      setMineral1Data(
-        FORMAT_DATA(
+    if (
+      mineral1DataFromFile &&
+      grayScaleDataFromFile &&
+      grayScaleDataDownSampled
+    ) {
+      const downSampledData: DataType = {
+        res_x: Math.floor(mineral1DataFromFile.res_x / 2),
+        res_y: Math.floor(mineral1DataFromFile.res_y / 2),
+        data: flatten(
+          downsampleArray(
+            chunk(mineral1DataFromFile.data, mineral1DataFromFile.res_y),
+            2,
+          ),
+        ),
+      };
+      setMineral1Data({
+        downSampledData: FORMAT_DATA(
+          downSampledData,
+          grayScaleDataDownSampled,
+          mineral1Settings.threshold,
+          COLOR_SCALES[mineral1Settings.name],
+          0.2,
+        ),
+        fullData: FORMAT_DATA(
           mineral1DataFromFile,
           grayScaleDataFromFile,
           mineral1Settings.threshold,
           COLOR_SCALES[mineral1Settings.name],
         ),
-      );
+      });
     }
   }, [mineral1Settings.threshold, mineral1DataFromFile]);
 
   useEffect(() => {
-    if (mineral2DataFromFile && grayScaleDataFromFile) {
-      setMineral2Data(
-        FORMAT_DATA(
+    if (
+      mineral2DataFromFile &&
+      grayScaleDataFromFile &&
+      grayScaleDataDownSampled
+    ) {
+      const downSampledData: DataType = {
+        res_x: Math.floor(mineral2DataFromFile.res_x / 2),
+        res_y: Math.floor(mineral2DataFromFile.res_y / 2),
+        data: flatten(
+          downsampleArray(
+            chunk(mineral2DataFromFile.data, mineral2DataFromFile.res_y),
+            2,
+          ),
+        ),
+      };
+      setMineral2Data({
+        downSampledData: FORMAT_DATA(
+          downSampledData,
+          grayScaleDataDownSampled,
+          mineral2Settings.threshold,
+          COLOR_SCALES[mineral2Settings.name],
+          0.2,
+        ),
+        fullData: FORMAT_DATA(
           mineral2DataFromFile,
           grayScaleDataFromFile,
           mineral2Settings.threshold,
           COLOR_SCALES[mineral2Settings.name],
         ),
-      );
+      });
     }
   }, [mineral2Settings.threshold, mineral2DataFromFile]);
 
   useEffect(() => {
-    if (mineral3DataFromFile && grayScaleDataFromFile) {
-      setMineral3Data(
-        FORMAT_DATA(
+    if (
+      mineral3DataFromFile &&
+      grayScaleDataFromFile &&
+      grayScaleDataDownSampled
+    ) {
+      const downSampledData: DataType = {
+        res_x: Math.floor(mineral3DataFromFile.res_x / 2),
+        res_y: Math.floor(mineral3DataFromFile.res_y / 2),
+        data: flatten(
+          downsampleArray(
+            chunk(mineral3DataFromFile.data, mineral3DataFromFile.res_y),
+            2,
+          ),
+        ),
+      };
+      setMineral3Data({
+        downSampledData: FORMAT_DATA(
+          downSampledData,
+          grayScaleDataDownSampled,
+          mineral3Settings.threshold,
+          COLOR_SCALES[mineral3Settings.name],
+          0.2,
+        ),
+        fullData: FORMAT_DATA(
           mineral3DataFromFile,
           grayScaleDataFromFile,
           mineral3Settings.threshold,
           COLOR_SCALES[mineral3Settings.name],
         ),
-      );
+      });
     }
   }, [mineral3Settings.threshold, mineral3DataFromFile]);
 
