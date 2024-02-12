@@ -6,19 +6,24 @@ import { json } from 'd3-request';
 import { Plus, X } from 'lucide-react';
 import chunk from 'lodash.chunk';
 import flatten from 'lodash.flatten';
-import { DataFormattedType, DataType, MineralDataType } from './Types';
+import {
+  DataFormattedType,
+  DataType,
+  MineralDataType,
+  MineralSettingsDataType,
+} from './Types';
 import BoxView from './BoxView';
 
 const FORMAT_DATA = (
   data: DataType,
   grayScaleData: DataType,
-  thresholdValue: number,
+  thresholdValue: [number, number],
   colors: [string, string],
   gridSize?: number,
 ) => {
   const grayScaleColorScale = scaleLinear().domain([0, 1]).range([20, 245]);
   const elementColorScale = scaleLinear<string, string>()
-    .domain([0, thresholdValue])
+    .domain(thresholdValue)
     .range(colors);
   const regex = /rgb\((\d+), (\d+), (\d+)\)/;
   const formattedData: DataFormattedType[] = [];
@@ -26,15 +31,15 @@ const FORMAT_DATA = (
   const grayScaleColorScaleCache = grayScaleData.data.map(value =>
     grayScaleColorScale(value),
   );
-  const thresholdColor = elementColorScale(thresholdValue);
+  const thresholdColor = elementColorScale(thresholdValue[1]);
   const thresholdColorMatches = thresholdColor.match(regex) as string[];
 
   data.data.forEach((d, i) => {
     const grayScaleValue = grayScaleColorScaleCache[i];
     const color =
-      d === -1 || colors[0] === '#212121'
+      d < thresholdValue[0] || colors[0] === '#212121'
         ? [grayScaleValue, grayScaleValue, grayScaleValue]
-        : d > thresholdValue
+        : d > thresholdValue[1]
         ? [
             parseInt(thresholdColorMatches[1], 10),
             parseInt(thresholdColorMatches[2], 10),
@@ -101,9 +106,10 @@ export default function App() {
   const [grayScaleDataFromFile, setGrayScaleDataFromFile] = useState<
     DataType | undefined
   >(undefined);
-  const [grayScaleDataDownSampled, setGrayScaleDataDownSampled] = useState<
-    DataType | undefined
-  >(undefined);
+  const [grayScaleDataDownSampledLevel1, setGrayScaleDataDownSampledLevel1] =
+    useState<DataType | undefined>(undefined);
+  const [grayScaleDataDownSampledLevel2, setGrayScaleDataDownSampledLevel2] =
+    useState<DataType | undefined>(undefined);
   const [mineral1DataFromFile, setMineral1DataFromFile] = useState<
     DataType | undefined
   >(undefined);
@@ -125,18 +131,21 @@ export default function App() {
   const [mineral3Data, setMineral3Data] = useState<MineralDataType | undefined>(
     undefined,
   );
-  const [mineral1Settings, setMineral1Settings] = useState({
-    name: 'GrayScale',
-    threshold: 1,
-  });
-  const [mineral2Settings, setMineral2Settings] = useState({
-    name: 'Copper',
-    threshold: 1,
-  });
-  const [mineral3Settings, setMineral3Settings] = useState({
-    name: 'Iron',
-    threshold: 1,
-  });
+  const [mineral1Settings, setMineral1Settings] =
+    useState<MineralSettingsDataType>({
+      name: 'GrayScale',
+      threshold: [0, 1],
+    });
+  const [mineral2Settings, setMineral2Settings] =
+    useState<MineralSettingsDataType>({
+      name: 'Copper',
+      threshold: [0, 1],
+    });
+  const [mineral3Settings, setMineral3Settings] =
+    useState<MineralSettingsDataType>({
+      name: 'Iron',
+      threshold: [0, 1],
+    });
   const grayScaleColorScale = scaleLinear().domain([0, 1]).range([20, 245]);
   useEffect(() => {
     queue()
@@ -168,19 +177,46 @@ export default function App() {
               ]),
               type: 'pointCloud',
             }));
-          const downSampledData: DataType = {
+          const downSampledDataLevel1: DataType = {
             res_x: Math.floor(grayScale.res_x / 2),
             res_y: Math.floor(grayScale.res_y / 2),
             data: flatten(
               downsampleArray(chunk(grayScale.data, grayScale.res_y), 2),
             ),
           };
-          const grayScaleDataDownSampledFormatted: DataFormattedType[] =
-            downSampledData.data.map((d, i) => ({
+          const downSampledDataLevel2: DataType = {
+            res_x: Math.floor(grayScale.res_x / 3),
+            res_y: Math.floor(grayScale.res_y / 3),
+            data: flatten(
+              downsampleArray(chunk(grayScale.data, grayScale.res_y), 3),
+            ),
+          };
+          const grayScaleDataDownSampledLevel1Formatted: DataFormattedType[] =
+            downSampledDataLevel1.data.map((d, i) => ({
               position: new Float32Array([
-                ((i % downSampledData.res_y) - downSampledData.res_x / 2) * 0.1,
-                (Math.floor(i / downSampledData.res_y) -
-                  downSampledData.res_y / 2) *
+                ((i % downSampledDataLevel1.res_y) -
+                  downSampledDataLevel1.res_x / 2) *
+                  0.1,
+                (Math.floor(i / downSampledDataLevel1.res_y) -
+                  downSampledDataLevel1.res_y / 2) *
+                  0.1,
+              ]),
+              value: new Float32Array([d]),
+              color: new Float32Array([
+                grayScaleColorScale(d),
+                grayScaleColorScale(d),
+                grayScaleColorScale(d),
+              ]),
+              type: 'pointCloud',
+            }));
+          const grayScaleDataDownSampledLevel2Formatted: DataFormattedType[] =
+            downSampledDataLevel2.data.map((d, i) => ({
+              position: new Float32Array([
+                ((i % downSampledDataLevel1.res_y) -
+                  downSampledDataLevel1.res_x / 2) *
+                  0.1,
+                (Math.floor(i / downSampledDataLevel1.res_y) -
+                  downSampledDataLevel1.res_y / 2) *
                   0.1,
               ]),
               value: new Float32Array([d]),
@@ -192,11 +228,13 @@ export default function App() {
               type: 'pointCloud',
             }));
           setGrayScaleData({
-            downSampledData: grayScaleDataDownSampledFormatted,
+            downSampledDataLevel1: grayScaleDataDownSampledLevel1Formatted,
+            downSampledDataLevel2: grayScaleDataDownSampledLevel2Formatted,
             fullData: grayScaleDataFormatted,
           });
           setGrayScaleDataFromFile(grayScale);
-          setGrayScaleDataDownSampled(downSampledData);
+          setGrayScaleDataDownSampledLevel1(downSampledDataLevel1);
+          setGrayScaleDataDownSampledLevel2(downSampledDataLevel2);
           setMineral1DataFromFile(mineral_1);
           setMineral2DataFromFile(mineral_2);
           setMineral3DataFromFile(mineral_3);
@@ -208,9 +246,10 @@ export default function App() {
     if (
       mineral1DataFromFile &&
       grayScaleDataFromFile &&
-      grayScaleDataDownSampled
+      grayScaleDataDownSampledLevel1 &&
+      grayScaleDataDownSampledLevel2
     ) {
-      const downSampledData: DataType = {
+      const downSampledDataLevel1: DataType = {
         res_x: Math.floor(mineral1DataFromFile.res_x / 2),
         res_y: Math.floor(mineral1DataFromFile.res_y / 2),
         data: flatten(
@@ -220,11 +259,28 @@ export default function App() {
           ),
         ),
       };
+      const downSampledDataLevel2: DataType = {
+        res_x: Math.floor(mineral1DataFromFile.res_x / 3),
+        res_y: Math.floor(mineral1DataFromFile.res_y / 3),
+        data: flatten(
+          downsampleArray(
+            chunk(mineral1DataFromFile.data, mineral1DataFromFile.res_y),
+            3,
+          ),
+        ),
+      };
       setMineral1Data({
-        downSampledData: FORMAT_DATA(
-          downSampledData,
-          grayScaleDataDownSampled,
+        downSampledDataLevel1: FORMAT_DATA(
+          downSampledDataLevel1,
+          grayScaleDataDownSampledLevel1,
           mineral1Settings.threshold,
+          COLOR_SCALES[mineral1Settings.name],
+          0.2,
+        ),
+        downSampledDataLevel2: FORMAT_DATA(
+          downSampledDataLevel2,
+          grayScaleDataDownSampledLevel2,
+          mineral3Settings.threshold,
           COLOR_SCALES[mineral1Settings.name],
           0.2,
         ),
@@ -242,9 +298,10 @@ export default function App() {
     if (
       mineral2DataFromFile &&
       grayScaleDataFromFile &&
-      grayScaleDataDownSampled
+      grayScaleDataDownSampledLevel1 &&
+      grayScaleDataDownSampledLevel2
     ) {
-      const downSampledData: DataType = {
+      const downSampledDataLevel1: DataType = {
         res_x: Math.floor(mineral2DataFromFile.res_x / 2),
         res_y: Math.floor(mineral2DataFromFile.res_y / 2),
         data: flatten(
@@ -254,10 +311,27 @@ export default function App() {
           ),
         ),
       };
+      const downSampledDataLevel2: DataType = {
+        res_x: Math.floor(mineral2DataFromFile.res_x / 3),
+        res_y: Math.floor(mineral2DataFromFile.res_y / 3),
+        data: flatten(
+          downsampleArray(
+            chunk(mineral2DataFromFile.data, mineral2DataFromFile.res_y),
+            3,
+          ),
+        ),
+      };
       setMineral2Data({
-        downSampledData: FORMAT_DATA(
-          downSampledData,
-          grayScaleDataDownSampled,
+        downSampledDataLevel1: FORMAT_DATA(
+          downSampledDataLevel1,
+          grayScaleDataDownSampledLevel1,
+          mineral2Settings.threshold,
+          COLOR_SCALES[mineral2Settings.name],
+          0.2,
+        ),
+        downSampledDataLevel2: FORMAT_DATA(
+          downSampledDataLevel2,
+          grayScaleDataDownSampledLevel2,
           mineral2Settings.threshold,
           COLOR_SCALES[mineral2Settings.name],
           0.2,
@@ -276,9 +350,10 @@ export default function App() {
     if (
       mineral3DataFromFile &&
       grayScaleDataFromFile &&
-      grayScaleDataDownSampled
+      grayScaleDataDownSampledLevel1 &&
+      grayScaleDataDownSampledLevel2
     ) {
-      const downSampledData: DataType = {
+      const downSampledDataLevel1: DataType = {
         res_x: Math.floor(mineral3DataFromFile.res_x / 2),
         res_y: Math.floor(mineral3DataFromFile.res_y / 2),
         data: flatten(
@@ -288,10 +363,27 @@ export default function App() {
           ),
         ),
       };
+      const downSampledDataLevel2: DataType = {
+        res_x: Math.floor(mineral3DataFromFile.res_x / 3),
+        res_y: Math.floor(mineral3DataFromFile.res_y / 3),
+        data: flatten(
+          downsampleArray(
+            chunk(mineral3DataFromFile.data, mineral3DataFromFile.res_y),
+            3,
+          ),
+        ),
+      };
       setMineral3Data({
-        downSampledData: FORMAT_DATA(
-          downSampledData,
-          grayScaleDataDownSampled,
+        downSampledDataLevel1: FORMAT_DATA(
+          downSampledDataLevel1,
+          grayScaleDataDownSampledLevel1,
+          mineral3Settings.threshold,
+          COLOR_SCALES[mineral3Settings.name],
+          0.2,
+        ),
+        downSampledDataLevel2: FORMAT_DATA(
+          downSampledDataLevel2,
+          grayScaleDataDownSampledLevel2,
           mineral3Settings.threshold,
           COLOR_SCALES[mineral3Settings.name],
           0.2,
@@ -448,37 +540,41 @@ export default function App() {
                       }}
                     />
                   </div>
-                  <div>
-                    <p
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: '700',
-                        color: '#1D2223',
-                        margin: '0 0 8px 0',
-                      }}
-                    >
-                      Color Threshold ({mineral1Settings.threshold})
-                    </p>
-                    <Slider
-                      min={0}
-                      max={1}
-                      defaultValue={1}
-                      step={0.01}
-                      onChangeComplete={d => {
-                        setMineral1Settings({
-                          ...mineral1Settings,
-                          threshold: d,
-                        });
-                      }}
-                      disabled={mineral1Settings.name === 'GrayScale'}
-                      styles={{
-                        track: {
-                          background: 'transparent',
-                        },
-                        tracks: { background: '#2367DF' },
-                      }}
-                    />
-                  </div>
+                  {mineral1Settings.name === 'GrayScale' ? null : (
+                    <div>
+                      <p
+                        style={{
+                          fontSize: '0.75rem',
+                          fontWeight: '700',
+                          color: '#1D2223',
+                          margin: '0 0 8px 0',
+                        }}
+                      >
+                        Color Threshold ({mineral1Settings.threshold[0]}-
+                        {mineral1Settings.threshold[1]})
+                      </p>
+                      <Slider
+                        min={0}
+                        max={1}
+                        defaultValue={[0, 1]}
+                        range
+                        step={0.01}
+                        onChangeComplete={d => {
+                          setMineral1Settings({
+                            ...mineral1Settings,
+                            threshold: d as [number, number],
+                          });
+                        }}
+                        disabled={mineral1Settings.name === 'GrayScale'}
+                        styles={{
+                          track: {
+                            background: 'transparent',
+                          },
+                          tracks: { background: '#2367DF' },
+                        }}
+                      />
+                    </div>
+                  )}
                 </>
               ) : null}
             </div>
@@ -570,37 +666,41 @@ export default function App() {
                       }}
                     />
                   </div>
-                  <div>
-                    <p
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: '700',
-                        color: '#1D2223',
-                        margin: '0 0 8px 0',
-                      }}
-                    >
-                      Color Threshold ({mineral2Settings.threshold})
-                    </p>
-                    <Slider
-                      min={0}
-                      max={1}
-                      defaultValue={1}
-                      step={0.01}
-                      onChangeComplete={d => {
-                        setMineral2Settings({
-                          ...mineral2Settings,
-                          threshold: d,
-                        });
-                      }}
-                      disabled={mineral2Settings.name === 'GrayScale'}
-                      styles={{
-                        track: {
-                          background: 'transparent',
-                        },
-                        tracks: { background: '#2367DF' },
-                      }}
-                    />
-                  </div>
+                  {mineral2Settings.name === 'GrayScale' ? null : (
+                    <div>
+                      <p
+                        style={{
+                          fontSize: '0.75rem',
+                          fontWeight: '700',
+                          color: '#1D2223',
+                          margin: '0 0 8px 0',
+                        }}
+                      >
+                        Color Threshold ({mineral2Settings.threshold[0]}-
+                        {mineral2Settings.threshold[1]})
+                      </p>
+                      <Slider
+                        min={0}
+                        max={1}
+                        defaultValue={[0, 1]}
+                        range
+                        step={0.01}
+                        onChangeComplete={d => {
+                          setMineral2Settings({
+                            ...mineral2Settings,
+                            threshold: d as [number, number],
+                          });
+                        }}
+                        disabled={mineral2Settings.name === 'GrayScale'}
+                        styles={{
+                          track: {
+                            background: 'transparent',
+                          },
+                          tracks: { background: '#2367DF' },
+                        }}
+                      />
+                    </div>
+                  )}
                 </>
               ) : null}
             </div>
@@ -692,37 +792,41 @@ export default function App() {
                       }}
                     />
                   </div>
-                  <div>
-                    <p
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: '700',
-                        color: '#1D2223',
-                        margin: '0 0 8px 0',
-                      }}
-                    >
-                      Color Threshold ({mineral3Settings.threshold})
-                    </p>
-                    <Slider
-                      min={0}
-                      max={1}
-                      defaultValue={1}
-                      step={0.01}
-                      onChangeComplete={d => {
-                        setMineral3Settings({
-                          ...mineral3Settings,
-                          threshold: d,
-                        });
-                      }}
-                      disabled={mineral3Settings.name === 'GrayScale'}
-                      styles={{
-                        track: {
-                          background: 'transparent',
-                        },
-                        tracks: { background: '#2367DF' },
-                      }}
-                    />
-                  </div>
+                  {mineral3Settings.name === 'GrayScale' ? null : (
+                    <div>
+                      <p
+                        style={{
+                          fontSize: '0.75rem',
+                          fontWeight: '700',
+                          color: '#1D2223',
+                          margin: '0 0 8px 0',
+                        }}
+                      >
+                        Color Threshold ({mineral3Settings.threshold[0]}-
+                        {mineral3Settings.threshold[1]})
+                      </p>
+                      <Slider
+                        min={0}
+                        max={1}
+                        defaultValue={[0, 1]}
+                        step={0.01}
+                        range
+                        onChangeComplete={d => {
+                          setMineral3Settings({
+                            ...mineral3Settings,
+                            threshold: d as [number, number],
+                          });
+                        }}
+                        disabled={mineral3Settings.name === 'GrayScale'}
+                        styles={{
+                          track: {
+                            background: 'transparent',
+                          },
+                          tracks: { background: '#2367DF' },
+                        }}
+                      />
+                    </div>
+                  )}
                 </>
               ) : null}
             </div>

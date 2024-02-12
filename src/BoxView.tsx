@@ -61,31 +61,58 @@ export default function BoxView(props: Props) {
       visible: viewStates.top.zoom > 5,
     }),
     new GridCellLayer({
-      id: 'down-sampled-layer-for-top',
-      data: mineralData[0].downSampledData,
+      id: 'down-sampled-level-1-layer-for-top',
+      data: mineralData[0].downSampledDataLevel1,
       getPosition: d => d.position,
       getFillColor: d => d.color,
       cellSize: 0.2,
       pickable: true,
-      visible: viewStates.top.zoom <= 5,
+      visible: viewStates.top.zoom <= 5 && viewStates.top.zoom > 3.5,
     }),
     new GridCellLayer({
-      id: 'down-sampled-layer-for-middle',
-      data: mineralData[1].downSampledData,
+      id: 'down-sampled-level-1-layer-for-middle',
+      data: mineralData[1].downSampledDataLevel1,
       getPosition: d => d.position,
       getFillColor: d => d.color,
       cellSize: 0.2,
       pickable: true,
-      visible: viewStates.top.zoom <= 5,
+      visible: viewStates.top.zoom <= 5 && viewStates.top.zoom > 3.5,
     }),
     new GridCellLayer({
-      id: 'down-sampled-layer-for-bottom',
-      data: mineralData[2].downSampledData,
+      id: 'down-sampled-level-1-layer-for-bottom',
+      data: mineralData[2].downSampledDataLevel1,
       getPosition: d => d.position,
       getFillColor: d => d.color,
       cellSize: 0.2,
       pickable: true,
-      visible: viewStates.top.zoom <= 5,
+      visible: viewStates.top.zoom <= 5 && viewStates.top.zoom > 3.5,
+    }),
+    new GridCellLayer({
+      id: 'down-sampled-level-2-layer-for-top',
+      data: mineralData[0].downSampledDataLevel2,
+      getPosition: d => d.position,
+      getFillColor: d => d.color,
+      cellSize: 0.2,
+      pickable: true,
+      visible: viewStates.top.zoom <= 3.5,
+    }),
+    new GridCellLayer({
+      id: 'down-sampled-level-2-layer-for-middle',
+      data: mineralData[1].downSampledDataLevel2,
+      getPosition: d => d.position,
+      getFillColor: d => d.color,
+      cellSize: 0.2,
+      pickable: true,
+      visible: viewStates.top.zoom <= 3.5,
+    }),
+    new GridCellLayer({
+      id: 'down-sampled-level-2-layer-for-bottom',
+      data: mineralData[2].downSampledDataLevel2,
+      getPosition: d => d.position,
+      getFillColor: d => d.color,
+      cellSize: 0.2,
+      pickable: true,
+      visible: viewStates.top.zoom <= 3.5,
     }),
   ];
   const views = [
@@ -134,7 +161,8 @@ export default function BoxView(props: Props) {
       layerFilter={({ layer, viewport }) => {
         return (
           layer.id === `layer-for-${viewport.id}` ||
-          layer.id === `down-sampled-layer-for-${viewport.id}`
+          layer.id === `down-sampled-level-2-layer-for-${viewport.id}` ||
+          layer.id === `down-sampled-level-1-layer-for-${viewport.id}`
         );
       }}
       onViewStateChange={onViewStateChange}

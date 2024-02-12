@@ -12,11 +12,12 @@ export interface DataFormattedType {
 }
 
 export interface MineralDataType {
-  downSampledData: DataFormattedType[];
+  downSampledDataLevel1: DataFormattedType[];
+  downSampledDataLevel2: DataFormattedType[];
   fullData: DataFormattedType[];
 }
 
 export interface MineralSettingsDataType {
   name: string;
-  threshold: number;
+  threshold: [number, number];
 }
