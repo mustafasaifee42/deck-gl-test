@@ -16,6 +16,12 @@ import { FormatData } from '../Utils/FormatData';
 import { COLOR_SCALES } from '../Constants';
 import { UpdateThreshold } from '../Utils/UpdateThreshold';
 
+const FormatNumber = (number?: number) => {
+  const formattedNumber =
+    number === undefined || number === -1 ? 'NA' : number.toFixed(2);
+  return formattedNumber;
+};
+
 const UpdateBoxData = (
   name: string,
   threshold: [number, number],
@@ -95,6 +101,8 @@ export default function MainMenu() {
     updateBoxOneMineralDataForRender,
     updateBoxTwoMineralDataForRender,
     updateBoxThreeMineralDataForRender,
+    clickedIndex,
+    zoomLevel,
   } = useContext(Context);
 
   useEffect(() => {
@@ -217,6 +225,117 @@ export default function MainMenu() {
           boxSettings={boxThreeSettings}
           updateBoxSettings={updateBoxThreeSettings}
         />
+        <hr />
+        <p
+          style={{
+            fontWeight: '700',
+            fontSize: '12px',
+            margin: '0',
+            opacity: 0.8,
+            fontStyle: 'italic',
+          }}
+        >
+          Click on the box to see details or outside to hide the details
+        </p>
+        {clickedIndex === -1 ? null : (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              fontSize: '14px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                fontSize: '14px',
+                padding: '8px',
+                backgroundColor: '#e1e1e1',
+              }}
+            >
+              <div>{boxOneSettings.name}</div>
+              <div>
+                {zoomLevel <= 3.5
+                  ? FormatNumber(
+                      boxOneMineralDataForRender?.downSampledDataLevel2[
+                        clickedIndex
+                      ].value[0],
+                    )
+                  : zoomLevel <= 5
+                  ? FormatNumber(
+                      boxOneMineralDataForRender?.downSampledDataLevel1[
+                        clickedIndex
+                      ].value[0],
+                    )
+                  : FormatNumber(
+                      boxOneMineralDataForRender?.fullData[clickedIndex]
+                        .value[0],
+                    )}
+              </div>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                fontSize: '14px',
+                padding: '8px',
+              }}
+            >
+              <div>{boxTwoSettings.name}</div>
+              <div>
+                {zoomLevel <= 3.5
+                  ? FormatNumber(
+                      boxTwoMineralDataForRender?.downSampledDataLevel2[
+                        clickedIndex
+                      ].value[0],
+                    )
+                  : zoomLevel <= 5
+                  ? FormatNumber(
+                      boxTwoMineralDataForRender?.downSampledDataLevel1[
+                        clickedIndex
+                      ].value[0],
+                    )
+                  : FormatNumber(
+                      boxTwoMineralDataForRender?.fullData[clickedIndex]
+                        .value[0],
+                    )}
+              </div>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                fontSize: '14px',
+                padding: '8px',
+                backgroundColor: '#e1e1e1',
+              }}
+            >
+              <div>{boxThreeSettings.name}</div>
+              <div>
+                {zoomLevel <= 3.5
+                  ? FormatNumber(
+                      boxThreeMineralDataForRender?.downSampledDataLevel2[
+                        clickedIndex
+                      ].value[0],
+                    )
+                  : zoomLevel <= 5
+                  ? FormatNumber(
+                      boxThreeMineralDataForRender?.downSampledDataLevel1[
+                        clickedIndex
+                      ].value[0],
+                    )
+                  : FormatNumber(
+                      boxThreeMineralDataForRender?.fullData[clickedIndex]
+                        .value[0],
+                    )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

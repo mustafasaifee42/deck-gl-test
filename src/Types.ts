@@ -34,6 +34,8 @@ export interface MineralSettingsDataType {
 }
 
 export interface StateDataType {
+  clickedIndex: number;
+  zoomLevel: number;
   greyScaleData: MineralDataType;
   greyScaleDataForRender: MineralDataTypeForRender;
   boxOneMineralDataForRender?: MineralDataTypeForRender;
@@ -45,6 +47,8 @@ export interface StateDataType {
 }
 
 export interface CtxDataType extends StateDataType {
+  updateZoomLevel: (_d: number) => void;
+  updateClickedIndex: (_d: number) => void;
   updateGreyScaleData: (_d: MineralDataType) => void;
   updateGreyScaleDataForRender: (_d: MineralDataTypeForRender) => void;
   updateBoxOneMineralDataForRender: (_d: MineralDataTypeForRender) => void;

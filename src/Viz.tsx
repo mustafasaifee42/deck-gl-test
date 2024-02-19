@@ -20,6 +20,8 @@ export default function Viz(props: Props) {
   const initialState: StateDataType = {
     greyScaleData,
     greyScaleDataForRender,
+    clickedIndex: -1,
+    zoomLevel: 2,
     boxOneMineralDataForRender: undefined,
     boxTwoMineralDataForRender: undefined,
     boxThreeMineralDataForRender: undefined,
@@ -101,9 +103,24 @@ export default function Viz(props: Props) {
     });
   };
 
+  const updateClickedIndex = (data?: number) => {
+    dispatch({
+      type: 'UPDATE_CLICKED_INDEX',
+      payload: data,
+    });
+  };
+
+  const updateZoomLevel = (data?: number) => {
+    dispatch({
+      type: 'UPDATE_ZOOM_LEVEL',
+      payload: data,
+    });
+  };
+
   const contextValue = useMemo(
     () => ({
       ...state,
+      updateClickedIndex,
       updateBoxOneMineralDataForRender,
       updateBoxTwoMineralDataForRender,
       updateBoxThreeMineralDataForRender,
@@ -111,10 +128,12 @@ export default function Viz(props: Props) {
       updateBoxTwoSettings,
       updateBoxThreeSettings,
       updateGreyScaleData,
+      updateZoomLevel,
       updateGreyScaleDataForRender,
     }),
     [
       state,
+      updateClickedIndex,
       updateBoxOneMineralDataForRender,
       updateBoxTwoMineralDataForRender,
       updateBoxThreeMineralDataForRender,
@@ -122,6 +141,7 @@ export default function Viz(props: Props) {
       updateBoxTwoSettings,
       updateBoxThreeSettings,
       updateGreyScaleData,
+      updateZoomLevel,
       updateGreyScaleDataForRender,
     ],
   );

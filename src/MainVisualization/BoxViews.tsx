@@ -9,6 +9,8 @@ export default function BoxViews() {
     boxOneMineralDataForRender,
     boxTwoMineralDataForRender,
     boxThreeMineralDataForRender,
+    updateZoomLevel,
+    updateClickedIndex,
   } = useContext(Context);
   const [viewStates, setViewStates] = useState({
     top: {
@@ -159,6 +161,7 @@ export default function BoxViews() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onViewStateChange = useCallback((d: any) => {
     const { viewState } = d;
+    updateZoomLevel(d.zoom);
     setViewStates({
       top: viewState,
       middle: viewState,
@@ -187,8 +190,7 @@ export default function BoxViews() {
       }}
       useDevicePixels={false}
       onClick={info => {
-        // eslint-disable-next-line no-console
-        console.log('Clicked:', info);
+        updateClickedIndex(info.index);
       }}
     />
   );
