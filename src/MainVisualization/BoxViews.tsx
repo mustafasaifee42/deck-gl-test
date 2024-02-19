@@ -1,16 +1,15 @@
 import DeckGL from '@deck.gl/react/typed';
 import { GridCellLayer } from '@deck.gl/layers/typed';
 import { OrthographicView } from '@deck.gl/core/typed';
-import { useCallback, useState } from 'react';
-import { MineralDataType } from './Types';
+import { useCallback, useContext, useState } from 'react';
+import Context from '../Context/Context';
 
-interface Props {
-  mineralData: [MineralDataType, MineralDataType, MineralDataType];
-}
-
-export default function BoxView(props: Props) {
-  const { mineralData } = props;
-
+export default function BoxViews() {
+  const {
+    boxOneMineralDataForRender,
+    boxTwoMineralDataForRender,
+    boxThreeMineralDataForRender,
+  } = useContext(Context);
   const [viewStates, setViewStates] = useState({
     top: {
       target: [0, 0],
@@ -32,87 +31,103 @@ export default function BoxView(props: Props) {
   const layers = [
     new GridCellLayer({
       id: 'layer-for-top',
-      data: mineralData[0].fullData,
+      data: boxOneMineralDataForRender?.fullData,
       getPosition: d => d.position,
       getFillColor: d => d.color,
       cellSize: 0.1,
       pickable: true,
       fp64: false,
-      visible: viewStates.top.zoom > 5,
+      visible:
+        viewStates.top.zoom > 5 && boxOneMineralDataForRender !== undefined,
     }),
     new GridCellLayer({
       id: 'layer-for-middle',
-      data: mineralData[1].fullData,
+      data: boxTwoMineralDataForRender?.fullData,
       getPosition: d => d.position,
       getFillColor: d => d.color,
       cellSize: 0.1,
       pickable: true,
       fp64: false,
-      visible: viewStates.top.zoom > 5,
+      visible:
+        viewStates.top.zoom > 5 && boxTwoMineralDataForRender !== undefined,
     }),
     new GridCellLayer({
       id: 'layer-for-bottom',
-      data: mineralData[2].fullData,
+      data: boxThreeMineralDataForRender?.fullData,
       getPosition: d => d.position,
       getFillColor: d => d.color,
       cellSize: 0.1,
       pickable: true,
       fp64: false,
-      visible: viewStates.top.zoom > 5,
+      visible:
+        viewStates.top.zoom > 5 && boxThreeMineralDataForRender !== undefined,
     }),
     new GridCellLayer({
       id: 'down-sampled-level-1-layer-for-top',
-      data: mineralData[0].downSampledDataLevel1,
+      data: boxOneMineralDataForRender?.downSampledDataLevel1,
       getPosition: d => d.position,
       getFillColor: d => d.color,
       cellSize: 0.2,
       pickable: true,
-      visible: viewStates.top.zoom <= 5 && viewStates.top.zoom > 3.5,
+      visible:
+        viewStates.top.zoom <= 5 &&
+        viewStates.top.zoom > 3.5 &&
+        boxOneMineralDataForRender !== undefined,
     }),
     new GridCellLayer({
       id: 'down-sampled-level-1-layer-for-middle',
-      data: mineralData[1].downSampledDataLevel1,
+      data: boxTwoMineralDataForRender?.downSampledDataLevel1,
       getPosition: d => d.position,
       getFillColor: d => d.color,
       cellSize: 0.2,
       pickable: true,
-      visible: viewStates.top.zoom <= 5 && viewStates.top.zoom > 3.5,
+      visible:
+        viewStates.top.zoom <= 5 &&
+        viewStates.top.zoom > 3.5 &&
+        boxTwoMineralDataForRender !== undefined,
     }),
     new GridCellLayer({
       id: 'down-sampled-level-1-layer-for-bottom',
-      data: mineralData[2].downSampledDataLevel1,
+      data: boxThreeMineralDataForRender?.downSampledDataLevel1,
       getPosition: d => d.position,
       getFillColor: d => d.color,
       cellSize: 0.2,
       pickable: true,
-      visible: viewStates.top.zoom <= 5 && viewStates.top.zoom > 3.5,
+      visible:
+        viewStates.top.zoom <= 5 &&
+        viewStates.top.zoom > 3.5 &&
+        boxThreeMineralDataForRender !== undefined,
     }),
     new GridCellLayer({
       id: 'down-sampled-level-2-layer-for-top',
-      data: mineralData[0].downSampledDataLevel2,
+      data: boxOneMineralDataForRender?.downSampledDataLevel2,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      cellSize: 0.2,
+      cellSize: 0.3,
       pickable: true,
-      visible: viewStates.top.zoom <= 3.5,
+      visible:
+        viewStates.top.zoom <= 3.5 && boxOneMineralDataForRender !== undefined,
     }),
     new GridCellLayer({
       id: 'down-sampled-level-2-layer-for-middle',
-      data: mineralData[1].downSampledDataLevel2,
+      data: boxTwoMineralDataForRender?.downSampledDataLevel2,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      cellSize: 0.2,
+      cellSize: 0.3,
       pickable: true,
-      visible: viewStates.top.zoom <= 3.5,
+      visible:
+        viewStates.top.zoom <= 3.5 && boxTwoMineralDataForRender !== undefined,
     }),
     new GridCellLayer({
       id: 'down-sampled-level-2-layer-for-bottom',
-      data: mineralData[2].downSampledDataLevel2,
+      data: boxThreeMineralDataForRender?.downSampledDataLevel2,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      cellSize: 0.2,
+      cellSize: 0.3,
       pickable: true,
-      visible: viewStates.top.zoom <= 3.5,
+      visible:
+        viewStates.top.zoom <= 3.5 &&
+        boxThreeMineralDataForRender !== undefined,
     }),
   ];
   const views = [
@@ -171,6 +186,9 @@ export default function BoxView(props: Props) {
         return null;
       }}
       useDevicePixels={false}
+      onClick={info => {
+        console.log('Clicked:', info);
+      }}
     />
   );
 }
