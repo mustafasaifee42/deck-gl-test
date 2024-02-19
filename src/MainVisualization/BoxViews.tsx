@@ -187,6 +187,7 @@ export default function BoxViews() {
       }}
       useDevicePixels={false}
       onClick={info => {
+        // eslint-disable-next-line no-console
         console.log('Clicked:', info);
       }}
     />
