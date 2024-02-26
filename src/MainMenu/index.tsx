@@ -145,7 +145,7 @@ export default function MainMenu() {
       boxFourSettings.threshold,
       greyScaleData,
       greyScaleDataForRender,
-      updateBoxThreeMineralDataForRender,
+      updateBoxFourMineralDataForRender,
     );
   }, [boxFourSettings.name]);
 
