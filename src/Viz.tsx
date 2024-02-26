@@ -25,6 +25,7 @@ export default function Viz(props: Props) {
     boxOneMineralDataForRender: undefined,
     boxTwoMineralDataForRender: undefined,
     boxThreeMineralDataForRender: undefined,
+    boxFourMineralDataForRender: undefined,
     boxOneSettings: {
       name: 'GreyScale',
       threshold: [0, 1],
@@ -35,6 +36,10 @@ export default function Viz(props: Props) {
     },
     boxThreeSettings: {
       name: 'Copper',
+      threshold: [0, 1],
+    },
+    boxFourSettings: {
+      name: 'Aluminum',
       threshold: [0, 1],
     },
   };
@@ -82,6 +87,15 @@ export default function Viz(props: Props) {
     });
   };
 
+  const updateBoxFourMineralDataForRender = (
+    data?: MineralDataTypeForRender,
+  ) => {
+    dispatch({
+      type: 'UPDATE_BOX_FOUR_MINERAL_DATA_FOR_RENDER',
+      payload: data,
+    });
+  };
+
   const updateBoxOneSettings = (data?: BoxSettingsDataType) => {
     dispatch({
       type: 'UPDATE_BOX_ONE_SETTINGS',
@@ -99,6 +113,13 @@ export default function Viz(props: Props) {
   const updateBoxThreeSettings = (data?: BoxSettingsDataType) => {
     dispatch({
       type: 'UPDATE_BOX_THREE_SETTINGS',
+      payload: data,
+    });
+  };
+
+  const updateBoxFourSettings = (data?: BoxSettingsDataType) => {
+    dispatch({
+      type: 'UPDATE_BOX_FOUR_SETTINGS',
       payload: data,
     });
   };
@@ -124,9 +145,11 @@ export default function Viz(props: Props) {
       updateBoxOneMineralDataForRender,
       updateBoxTwoMineralDataForRender,
       updateBoxThreeMineralDataForRender,
+      updateBoxFourMineralDataForRender,
       updateBoxOneSettings,
       updateBoxTwoSettings,
       updateBoxThreeSettings,
+      updateBoxFourSettings,
       updateGreyScaleData,
       updateZoomLevel,
       updateGreyScaleDataForRender,
@@ -137,9 +160,11 @@ export default function Viz(props: Props) {
       updateBoxOneMineralDataForRender,
       updateBoxTwoMineralDataForRender,
       updateBoxThreeMineralDataForRender,
+      updateBoxFourMineralDataForRender,
       updateBoxOneSettings,
       updateBoxTwoSettings,
       updateBoxThreeSettings,
+      updateBoxFourSettings,
       updateGreyScaleData,
       updateZoomLevel,
       updateGreyScaleDataForRender,
@@ -149,6 +174,30 @@ export default function Viz(props: Props) {
     <Context.Provider value={contextValue}>
       <MainMenu />
       <MainVisualization />
+      <div
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.5)',
+          position: 'fixed',
+          width: '100%',
+          height: '1px',
+          zIndex: '20',
+          top: '50%',
+          left: '0',
+          margin: 0,
+        }}
+      />
+      <div
+        style={{
+          backgroundColor: 'rgba(255,255,255,0.5)',
+          position: 'fixed',
+          width: '1px',
+          height: '100vh',
+          zIndex: '20',
+          left: '50%',
+          top: '0',
+          margin: 0,
+        }}
+      />
     </Context.Provider>
   );
 }

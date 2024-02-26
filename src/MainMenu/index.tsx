@@ -92,15 +92,19 @@ export default function MainMenu() {
     boxOneSettings,
     boxTwoSettings,
     boxThreeSettings,
+    boxFourSettings,
     updateBoxOneSettings,
     updateBoxTwoSettings,
     updateBoxThreeSettings,
+    updateBoxFourSettings,
     boxOneMineralDataForRender,
     boxTwoMineralDataForRender,
     boxThreeMineralDataForRender,
+    boxFourMineralDataForRender,
     updateBoxOneMineralDataForRender,
     updateBoxTwoMineralDataForRender,
     updateBoxThreeMineralDataForRender,
+    updateBoxFourMineralDataForRender,
     clickedIndex,
     zoomLevel,
   } = useContext(Context);
@@ -134,6 +138,16 @@ export default function MainMenu() {
       updateBoxThreeMineralDataForRender,
     );
   }, [boxThreeSettings.name]);
+
+  useEffect(() => {
+    UpdateBoxData(
+      boxFourSettings.name,
+      boxFourSettings.threshold,
+      greyScaleData,
+      greyScaleDataForRender,
+      updateBoxThreeMineralDataForRender,
+    );
+  }, [boxFourSettings.name]);
 
   useEffect(() => {
     if (boxOneMineralDataForRender) {
@@ -179,6 +193,22 @@ export default function MainMenu() {
       );
     }
   }, [boxThreeSettings.threshold]);
+
+  useEffect(() => {
+    if (boxFourMineralDataForRender) {
+      updateBoxFourMineralDataForRender(
+        UpdateThreshold(
+          boxFourMineralDataForRender,
+          greyScaleDataForRender,
+          boxFourSettings.threshold,
+          COLOR_SCALES[
+            COLOR_SCALES.findIndex(el => el.value === boxFourSettings.name)
+          ].colors as [string, string],
+        ),
+      );
+    }
+  }, [boxFourSettings.threshold]);
+
   return (
     <div
       style={{
@@ -211,19 +241,24 @@ export default function MainMenu() {
           Settings
         </h5>
         <BoxSettings
-          title='Box 1'
+          title='View 1'
           boxSettings={boxOneSettings}
           updateBoxSettings={updateBoxOneSettings}
         />
         <BoxSettings
-          title='Box 2'
+          title='View 2'
           boxSettings={boxTwoSettings}
           updateBoxSettings={updateBoxTwoSettings}
         />
         <BoxSettings
-          title='Box 3'
+          title='View 3'
           boxSettings={boxThreeSettings}
           updateBoxSettings={updateBoxThreeSettings}
+        />
+        <BoxSettings
+          title='View 4'
+          boxSettings={boxFourSettings}
+          updateBoxSettings={updateBoxFourSettings}
         />
         <hr />
         <p
@@ -330,6 +365,36 @@ export default function MainMenu() {
                     )
                   : FormatNumber(
                       boxThreeMineralDataForRender?.fullData[clickedIndex]
+                        .value[0],
+                    )}
+              </div>
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                fontSize: '14px',
+                padding: '8px',
+                backgroundColor: '#e1e1e1',
+              }}
+            >
+              <div>{boxFourSettings.name}</div>
+              <div>
+                {zoomLevel <= 3.5
+                  ? FormatNumber(
+                      boxFourMineralDataForRender?.downSampledDataLevel2[
+                        clickedIndex
+                      ].value[0],
+                    )
+                  : zoomLevel <= 5
+                  ? FormatNumber(
+                      boxFourMineralDataForRender?.downSampledDataLevel1[
+                        clickedIndex
+                      ].value[0],
+                    )
+                  : FormatNumber(
+                      boxFourMineralDataForRender?.fullData[clickedIndex]
                         .value[0],
                     )}
               </div>

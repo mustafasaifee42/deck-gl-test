@@ -15,12 +15,16 @@ export default (state: StateDataType, action: any) => {
       return { ...state, boxTwoMineralDataForRender: action.payload };
     case 'UPDATE_BOX_THREE_MINERAL_DATA_FOR_RENDER':
       return { ...state, boxThreeMineralDataForRender: action.payload };
+    case 'UPDATE_BOX_FOUR_MINERAL_DATA_FOR_RENDER':
+      return { ...state, boxFourMineralDataForRender: action.payload };
     case 'UPDATE_BOX_ONE_SETTINGS':
       return { ...state, boxOneSettings: action.payload };
     case 'UPDATE_BOX_TWO_SETTINGS':
       return { ...state, boxTwoSettings: action.payload };
     case 'UPDATE_BOX_THREE_SETTINGS':
       return { ...state, boxThreeSettings: action.payload };
+    case 'UPDATE_BOX_FOUR_SETTINGS':
+      return { ...state, boxFourSettings: action.payload };
     case 'UPDATE_CLICKED_INDEX':
       return { ...state, clickedIndex: action.payload };
     default:

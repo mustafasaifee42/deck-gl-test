@@ -32,6 +32,7 @@ const Context = createContext<CtxDataType>({
   boxOneMineralDataForRender: undefined,
   boxTwoMineralDataForRender: undefined,
   boxThreeMineralDataForRender: undefined,
+  boxFourMineralDataForRender: undefined,
   boxOneSettings: {
     name: 'GreyScale',
     threshold: [0, 1],
@@ -44,6 +45,10 @@ const Context = createContext<CtxDataType>({
     name: 'Copper',
     threshold: [0, 1],
   },
+  boxFourSettings: {
+    name: 'Aluminum',
+    threshold: [0, 1],
+  },
   clickedIndex: -1,
   zoomLevel: 2,
   updateClickedIndex: (_d: number) => {},
@@ -53,9 +58,11 @@ const Context = createContext<CtxDataType>({
   updateBoxOneMineralDataForRender: (_d: MineralDataTypeForRender) => {},
   updateBoxTwoMineralDataForRender: (_d: MineralDataTypeForRender) => {},
   updateBoxThreeMineralDataForRender: (_d: MineralDataTypeForRender) => {},
+  updateBoxFourMineralDataForRender: (_d: MineralDataTypeForRender) => {},
   updateBoxOneSettings: (_d: BoxSettingsDataType) => {},
   updateBoxTwoSettings: (_d: BoxSettingsDataType) => {},
   updateBoxThreeSettings: (_d: BoxSettingsDataType) => {},
+  updateBoxFourSettings: (_d: BoxSettingsDataType) => {},
 });
 
 export default Context;

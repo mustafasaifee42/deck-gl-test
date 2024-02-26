@@ -41,9 +41,11 @@ export interface StateDataType {
   boxOneMineralDataForRender?: MineralDataTypeForRender;
   boxTwoMineralDataForRender?: MineralDataTypeForRender;
   boxThreeMineralDataForRender?: MineralDataTypeForRender;
+  boxFourMineralDataForRender?: MineralDataTypeForRender;
   boxOneSettings: BoxSettingsDataType;
   boxTwoSettings: BoxSettingsDataType;
   boxThreeSettings: BoxSettingsDataType;
+  boxFourSettings: BoxSettingsDataType;
 }
 
 export interface CtxDataType extends StateDataType {
@@ -54,7 +56,9 @@ export interface CtxDataType extends StateDataType {
   updateBoxOneMineralDataForRender: (_d: MineralDataTypeForRender) => void;
   updateBoxTwoMineralDataForRender: (_d: MineralDataTypeForRender) => void;
   updateBoxThreeMineralDataForRender: (_d: MineralDataTypeForRender) => void;
+  updateBoxFourMineralDataForRender: (_d: MineralDataTypeForRender) => void;
   updateBoxOneSettings: (_d: BoxSettingsDataType) => void;
   updateBoxTwoSettings: (_d: BoxSettingsDataType) => void;
   updateBoxThreeSettings: (_d: BoxSettingsDataType) => void;
+  updateBoxFourSettings: (_d: BoxSettingsDataType) => void;
 }
