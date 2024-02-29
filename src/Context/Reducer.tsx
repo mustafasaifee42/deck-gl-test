@@ -5,18 +5,14 @@ export default (state: StateDataType, action: any) => {
   switch (action.type) {
     case 'UPDATE_ZOOM_LEVEL':
       return { ...state, zoomLevel: action.payload };
-    case 'UPDATE_GREY_SCALE_DATA':
-      return { ...state, greyScaleData: action.payload };
-    case 'UPDATE_GREY_SCALE_DATA_FOR_RENDER':
-      return { ...state, greyScaleDataForRender: action.payload };
-    case 'UPDATE_BOX_ONE_MINERAL_DATA_FOR_RENDER':
-      return { ...state, boxOneMineralDataForRender: action.payload };
-    case 'UPDATE_BOX_TWO_MINERAL_DATA_FOR_RENDER':
-      return { ...state, boxTwoMineralDataForRender: action.payload };
-    case 'UPDATE_BOX_THREE_MINERAL_DATA_FOR_RENDER':
-      return { ...state, boxThreeMineralDataForRender: action.payload };
-    case 'UPDATE_BOX_FOUR_MINERAL_DATA_FOR_RENDER':
-      return { ...state, boxFourMineralDataForRender: action.payload };
+    case 'UPDATE_BOX_ONE_MINERAL_DATA':
+      return { ...state, boxOneMineralData: action.payload };
+    case 'UPDATE_BOX_TWO_MINERAL_DATA':
+      return { ...state, boxTwoMineralData: action.payload };
+    case 'UPDATE_BOX_THREE_MINERAL_DATA':
+      return { ...state, boxThreeMineralData: action.payload };
+    case 'UPDATE_BOX_FOUR_MINERAL_DATA':
+      return { ...state, boxFourMineralData: action.payload };
     case 'UPDATE_BOX_ONE_SETTINGS':
       return { ...state, boxOneSettings: action.payload };
     case 'UPDATE_BOX_TWO_SETTINGS':

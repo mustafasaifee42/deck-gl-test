@@ -1,94 +1,44 @@
 import { useContext, useEffect } from 'react';
 import { queue } from 'd3-queue';
 import { json } from 'd3-request';
-import chunk from 'lodash.chunk';
-import flatten from 'lodash.flatten';
 import BoxSettings from './BoxSettings';
 import Context from '../Context/Context';
 import {
   DataType,
   DataFormattedType,
-  MineralDataType,
   MineralDataTypeForRender,
 } from '../Types';
-import { DownSampleData } from '../Utils/DownSampleData';
 import { FormatData } from '../Utils/FormatData';
 import { COLOR_SCALES } from '../Constants';
 import { UpdateThreshold } from '../Utils/UpdateThreshold';
 
-const FormatNumber = (number?: number) => {
-  const formattedNumber =
-    number === undefined || number === -1 ? 'NA' : number.toFixed(2);
-  return formattedNumber;
-};
-
 const UpdateBoxData = (
   name: string,
   threshold: [number, number],
-  greyScaleData: MineralDataType,
-  greyScaleDataForRender: MineralDataTypeForRender,
   updateFunction: (_d: MineralDataTypeForRender) => void,
 ) => {
-  if (name !== 'GreyScale') {
-    queue()
-      .defer(json, `./data/${name}.json`)
-      .await(
-        (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          err: any,
-          data: DataType,
-        ) => {
-          if (err) throw err;
-          const fullData = FormatData(
-            greyScaleData.fullData,
-            threshold,
-            COLOR_SCALES[COLOR_SCALES.findIndex(el => el.value === name)]
-              .colors as [string, string],
-            0.1,
-            data,
-          ) as DataFormattedType[];
-          let downSampledData: DataType = {
-            res_x: Math.floor(data.res_x / 2),
-            res_y: Math.floor(data.res_y / 2),
-            data: flatten(DownSampleData(chunk(data.data, data.res_y), 2)),
-          };
-          const downSampledDataLevel1 = FormatData(
-            greyScaleData.downSampledDataLevel1,
-            threshold,
-            COLOR_SCALES[COLOR_SCALES.findIndex(el => el.value === name)]
-              .colors as [string, string],
-            0.2,
-            downSampledData,
-          ) as DataFormattedType[];
-          downSampledData = {
-            res_x: Math.floor(data.res_x / 3),
-            res_y: Math.floor(data.res_y / 3),
-            data: flatten(DownSampleData(chunk(data.data, data.res_y), 3)),
-          };
-          const downSampledDataLevel2 = FormatData(
-            greyScaleData.downSampledDataLevel2,
-            threshold,
-            COLOR_SCALES[COLOR_SCALES.findIndex(el => el.value === name)]
-              .colors as [string, string],
-            0.3,
-            downSampledData,
-          ) as DataFormattedType[];
-          updateFunction({
-            downSampledDataLevel1,
-            downSampledDataLevel2,
-            fullData,
-          });
-        },
-      );
-  } else {
-    updateFunction(greyScaleDataForRender);
-  }
+  queue()
+    .defer(json, `./data/${name}.json`)
+    .await(
+      (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        err: any,
+        data: DataType,
+      ) => {
+        if (err) throw err;
+        const fullData = FormatData(
+          data,
+          threshold,
+          COLOR_SCALES[COLOR_SCALES.findIndex(el => el.value === name)]
+            .colors as [string, string],
+        ) as DataFormattedType[];
+        updateFunction({ data, dataForRender: fullData });
+      },
+    );
 };
 
 export default function MainMenu() {
   const {
-    greyScaleData,
-    greyScaleDataForRender,
     boxOneSettings,
     boxTwoSettings,
     boxThreeSettings,
@@ -97,25 +47,21 @@ export default function MainMenu() {
     updateBoxTwoSettings,
     updateBoxThreeSettings,
     updateBoxFourSettings,
-    boxOneMineralDataForRender,
-    boxTwoMineralDataForRender,
-    boxThreeMineralDataForRender,
-    boxFourMineralDataForRender,
-    updateBoxOneMineralDataForRender,
-    updateBoxTwoMineralDataForRender,
-    updateBoxThreeMineralDataForRender,
-    updateBoxFourMineralDataForRender,
-    clickedIndex,
-    zoomLevel,
+    boxOneMineralData,
+    boxTwoMineralData,
+    boxThreeMineralData,
+    boxFourMineralData,
+    updateBoxOneMineralData,
+    updateBoxTwoMineralData,
+    updateBoxThreeMineralData,
+    updateBoxFourMineralData,
   } = useContext(Context);
 
   useEffect(() => {
     UpdateBoxData(
       boxOneSettings.name,
       boxOneSettings.threshold,
-      greyScaleData,
-      greyScaleDataForRender,
-      updateBoxOneMineralDataForRender,
+      updateBoxOneMineralData,
     );
   }, [boxOneSettings.name]);
 
@@ -123,9 +69,7 @@ export default function MainMenu() {
     UpdateBoxData(
       boxTwoSettings.name,
       boxTwoSettings.threshold,
-      greyScaleData,
-      greyScaleDataForRender,
-      updateBoxTwoMineralDataForRender,
+      updateBoxTwoMineralData,
     );
   }, [boxTwoSettings.name]);
 
@@ -133,9 +77,7 @@ export default function MainMenu() {
     UpdateBoxData(
       boxThreeSettings.name,
       boxThreeSettings.threshold,
-      greyScaleData,
-      greyScaleDataForRender,
-      updateBoxThreeMineralDataForRender,
+      updateBoxThreeMineralData,
     );
   }, [boxThreeSettings.name]);
 
@@ -143,18 +85,15 @@ export default function MainMenu() {
     UpdateBoxData(
       boxFourSettings.name,
       boxFourSettings.threshold,
-      greyScaleData,
-      greyScaleDataForRender,
-      updateBoxFourMineralDataForRender,
+      updateBoxFourMineralData,
     );
   }, [boxFourSettings.name]);
 
   useEffect(() => {
-    if (boxOneMineralDataForRender) {
-      updateBoxOneMineralDataForRender(
+    if (boxOneMineralData) {
+      updateBoxOneMineralData(
         UpdateThreshold(
-          boxOneMineralDataForRender,
-          greyScaleDataForRender,
+          boxOneMineralData,
           boxOneSettings.threshold,
           COLOR_SCALES[
             COLOR_SCALES.findIndex(el => el.value === boxOneSettings.name)
@@ -165,11 +104,10 @@ export default function MainMenu() {
   }, [boxOneSettings.threshold]);
 
   useEffect(() => {
-    if (boxTwoMineralDataForRender) {
-      updateBoxTwoMineralDataForRender(
+    if (boxTwoMineralData) {
+      updateBoxTwoMineralData(
         UpdateThreshold(
-          boxTwoMineralDataForRender,
-          greyScaleDataForRender,
+          boxTwoMineralData,
           boxTwoSettings.threshold,
           COLOR_SCALES[
             COLOR_SCALES.findIndex(el => el.value === boxTwoSettings.name)
@@ -180,11 +118,10 @@ export default function MainMenu() {
   }, [boxTwoSettings.threshold]);
 
   useEffect(() => {
-    if (boxThreeMineralDataForRender) {
-      updateBoxThreeMineralDataForRender(
+    if (boxThreeMineralData) {
+      updateBoxThreeMineralData(
         UpdateThreshold(
-          boxThreeMineralDataForRender,
-          greyScaleDataForRender,
+          boxThreeMineralData,
           boxThreeSettings.threshold,
           COLOR_SCALES[
             COLOR_SCALES.findIndex(el => el.value === boxThreeSettings.name)
@@ -195,11 +132,10 @@ export default function MainMenu() {
   }, [boxThreeSettings.threshold]);
 
   useEffect(() => {
-    if (boxFourMineralDataForRender) {
-      updateBoxFourMineralDataForRender(
+    if (boxFourMineralData) {
+      updateBoxFourMineralData(
         UpdateThreshold(
-          boxFourMineralDataForRender,
-          greyScaleDataForRender,
+          boxFourMineralData,
           boxFourSettings.threshold,
           COLOR_SCALES[
             COLOR_SCALES.findIndex(el => el.value === boxFourSettings.name)
@@ -272,135 +208,6 @@ export default function MainMenu() {
         >
           Click on the box to see details or outside to hide the details
         </p>
-        {clickedIndex === -1 ? null : (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              fontSize: '14px',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                fontSize: '14px',
-                padding: '8px',
-                backgroundColor: '#e1e1e1',
-              }}
-            >
-              <div>{boxOneSettings.name}</div>
-              <div>
-                {zoomLevel <= 3.5
-                  ? FormatNumber(
-                      boxOneMineralDataForRender?.downSampledDataLevel2[
-                        clickedIndex
-                      ].value[0],
-                    )
-                  : zoomLevel <= 5
-                  ? FormatNumber(
-                      boxOneMineralDataForRender?.downSampledDataLevel1[
-                        clickedIndex
-                      ].value[0],
-                    )
-                  : FormatNumber(
-                      boxOneMineralDataForRender?.fullData[clickedIndex]
-                        .value[0],
-                    )}
-              </div>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                fontSize: '14px',
-                padding: '8px',
-              }}
-            >
-              <div>{boxTwoSettings.name}</div>
-              <div>
-                {zoomLevel <= 3.5
-                  ? FormatNumber(
-                      boxTwoMineralDataForRender?.downSampledDataLevel2[
-                        clickedIndex
-                      ].value[0],
-                    )
-                  : zoomLevel <= 5
-                  ? FormatNumber(
-                      boxTwoMineralDataForRender?.downSampledDataLevel1[
-                        clickedIndex
-                      ].value[0],
-                    )
-                  : FormatNumber(
-                      boxTwoMineralDataForRender?.fullData[clickedIndex]
-                        .value[0],
-                    )}
-              </div>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                fontSize: '14px',
-                padding: '8px',
-                backgroundColor: '#e1e1e1',
-              }}
-            >
-              <div>{boxThreeSettings.name}</div>
-              <div>
-                {zoomLevel <= 3.5
-                  ? FormatNumber(
-                      boxThreeMineralDataForRender?.downSampledDataLevel2[
-                        clickedIndex
-                      ].value[0],
-                    )
-                  : zoomLevel <= 5
-                  ? FormatNumber(
-                      boxThreeMineralDataForRender?.downSampledDataLevel1[
-                        clickedIndex
-                      ].value[0],
-                    )
-                  : FormatNumber(
-                      boxThreeMineralDataForRender?.fullData[clickedIndex]
-                        .value[0],
-                    )}
-              </div>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'baseline',
-                fontSize: '14px',
-                padding: '8px',
-                backgroundColor: '#e1e1e1',
-              }}
-            >
-              <div>{boxFourSettings.name}</div>
-              <div>
-                {zoomLevel <= 3.5
-                  ? FormatNumber(
-                      boxFourMineralDataForRender?.downSampledDataLevel2[
-                        clickedIndex
-                      ].value[0],
-                    )
-                  : zoomLevel <= 5
-                  ? FormatNumber(
-                      boxFourMineralDataForRender?.downSampledDataLevel1[
-                        clickedIndex
-                      ].value[0],
-                    )
-                  : FormatNumber(
-                      boxFourMineralDataForRender?.fullData[clickedIndex]
-                        .value[0],
-                    )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ export interface DataFormattedType {
   position: Float32Array;
   color: Float32Array;
   value: Float32Array;
-  type: 'pointCloud' | 'mineral';
 }
 
 export interface MineralDataType {
@@ -18,9 +17,8 @@ export interface MineralDataType {
 }
 
 export interface MineralDataTypeForRender {
-  downSampledDataLevel1: DataFormattedType[];
-  downSampledDataLevel2: DataFormattedType[];
-  fullData: DataFormattedType[];
+  data: DataType;
+  dataForRender: DataFormattedType[];
 }
 
 export interface BoxSettingsDataType {
@@ -36,12 +34,10 @@ export interface MineralSettingsDataType {
 export interface StateDataType {
   clickedIndex: number;
   zoomLevel: number;
-  greyScaleData: MineralDataType;
-  greyScaleDataForRender: MineralDataTypeForRender;
-  boxOneMineralDataForRender?: MineralDataTypeForRender;
-  boxTwoMineralDataForRender?: MineralDataTypeForRender;
-  boxThreeMineralDataForRender?: MineralDataTypeForRender;
-  boxFourMineralDataForRender?: MineralDataTypeForRender;
+  boxOneMineralData?: MineralDataTypeForRender;
+  boxTwoMineralData?: MineralDataTypeForRender;
+  boxThreeMineralData?: MineralDataTypeForRender;
+  boxFourMineralData?: MineralDataTypeForRender;
   boxOneSettings: BoxSettingsDataType;
   boxTwoSettings: BoxSettingsDataType;
   boxThreeSettings: BoxSettingsDataType;
@@ -51,12 +47,10 @@ export interface StateDataType {
 export interface CtxDataType extends StateDataType {
   updateZoomLevel: (_d: number) => void;
   updateClickedIndex: (_d: number) => void;
-  updateGreyScaleData: (_d: MineralDataType) => void;
-  updateGreyScaleDataForRender: (_d: MineralDataTypeForRender) => void;
-  updateBoxOneMineralDataForRender: (_d: MineralDataTypeForRender) => void;
-  updateBoxTwoMineralDataForRender: (_d: MineralDataTypeForRender) => void;
-  updateBoxThreeMineralDataForRender: (_d: MineralDataTypeForRender) => void;
-  updateBoxFourMineralDataForRender: (_d: MineralDataTypeForRender) => void;
+  updateBoxOneMineralData: (_d?: MineralDataTypeForRender) => void;
+  updateBoxTwoMineralData: (_d?: MineralDataTypeForRender) => void;
+  updateBoxThreeMineralData: (_d?: MineralDataTypeForRender) => void;
+  updateBoxFourMineralData: (_d?: MineralDataTypeForRender) => void;
   updateBoxOneSettings: (_d: BoxSettingsDataType) => void;
   updateBoxTwoSettings: (_d: BoxSettingsDataType) => void;
   updateBoxThreeSettings: (_d: BoxSettingsDataType) => void;

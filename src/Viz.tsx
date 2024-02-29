@@ -3,29 +3,20 @@ import MainMenu from './MainMenu';
 import MainVisualization from './MainVisualization';
 import {
   BoxSettingsDataType,
-  MineralDataType,
   MineralDataTypeForRender,
   StateDataType,
 } from './Types';
 import Context from './Context/Context';
 import Reducer from './Context/Reducer';
 
-interface Props {
-  greyScaleData: MineralDataType;
-  greyScaleDataForRender: MineralDataTypeForRender;
-}
-
-export default function Viz(props: Props) {
-  const { greyScaleData, greyScaleDataForRender } = props;
+export default function Viz() {
   const initialState: StateDataType = {
-    greyScaleData,
-    greyScaleDataForRender,
     clickedIndex: -1,
     zoomLevel: 2,
-    boxOneMineralDataForRender: undefined,
-    boxTwoMineralDataForRender: undefined,
-    boxThreeMineralDataForRender: undefined,
-    boxFourMineralDataForRender: undefined,
+    boxOneMineralData: undefined,
+    boxTwoMineralData: undefined,
+    boxThreeMineralData: undefined,
+    boxFourMineralData: undefined,
     boxOneSettings: {
       name: 'GreyScale',
       threshold: [0, 1],
@@ -46,52 +37,30 @@ export default function Viz(props: Props) {
 
   const [state, dispatch] = useReducer(Reducer, initialState);
 
-  const updateGreyScaleData = (data?: MineralDataType) => {
+  const updateBoxOneMineralData = (data?: MineralDataTypeForRender) => {
     dispatch({
-      type: 'UPDATE_GREY_SCALE_DATA',
+      type: 'UPDATE_BOX_ONE_MINERAL_DATA',
       payload: data,
     });
   };
 
-  const updateGreyScaleDataForRender = (data?: MineralDataTypeForRender) => {
+  const updateBoxTwoMineralData = (data?: MineralDataTypeForRender) => {
     dispatch({
-      type: 'UPDATE_GREY_SCALE_DATA',
+      type: 'UPDATE_BOX_TWO_MINERAL_DATA',
       payload: data,
     });
   };
 
-  const updateBoxOneMineralDataForRender = (
-    data?: MineralDataTypeForRender,
-  ) => {
+  const updateBoxThreeMineralData = (data?: MineralDataTypeForRender) => {
     dispatch({
-      type: 'UPDATE_BOX_ONE_MINERAL_DATA_FOR_RENDER',
+      type: 'UPDATE_BOX_THREE_MINERAL_DATA',
       payload: data,
     });
   };
 
-  const updateBoxTwoMineralDataForRender = (
-    data?: MineralDataTypeForRender,
-  ) => {
+  const updateBoxFourMineralData = (data?: MineralDataTypeForRender) => {
     dispatch({
-      type: 'UPDATE_BOX_TWO_MINERAL_DATA_FOR_RENDER',
-      payload: data,
-    });
-  };
-
-  const updateBoxThreeMineralDataForRender = (
-    data?: MineralDataTypeForRender,
-  ) => {
-    dispatch({
-      type: 'UPDATE_BOX_THREE_MINERAL_DATA_FOR_RENDER',
-      payload: data,
-    });
-  };
-
-  const updateBoxFourMineralDataForRender = (
-    data?: MineralDataTypeForRender,
-  ) => {
-    dispatch({
-      type: 'UPDATE_BOX_FOUR_MINERAL_DATA_FOR_RENDER',
+      type: 'UPDATE_BOX_FOUR_MINERAL_DATA',
       payload: data,
     });
   };
@@ -142,32 +111,28 @@ export default function Viz(props: Props) {
     () => ({
       ...state,
       updateClickedIndex,
-      updateBoxOneMineralDataForRender,
-      updateBoxTwoMineralDataForRender,
-      updateBoxThreeMineralDataForRender,
-      updateBoxFourMineralDataForRender,
+      updateBoxOneMineralData,
+      updateBoxTwoMineralData,
+      updateBoxThreeMineralData,
+      updateBoxFourMineralData,
       updateBoxOneSettings,
       updateBoxTwoSettings,
       updateBoxThreeSettings,
       updateBoxFourSettings,
-      updateGreyScaleData,
       updateZoomLevel,
-      updateGreyScaleDataForRender,
     }),
     [
       state,
       updateClickedIndex,
-      updateBoxOneMineralDataForRender,
-      updateBoxTwoMineralDataForRender,
-      updateBoxThreeMineralDataForRender,
-      updateBoxFourMineralDataForRender,
+      updateBoxOneMineralData,
+      updateBoxTwoMineralData,
+      updateBoxThreeMineralData,
+      updateBoxFourMineralData,
       updateBoxOneSettings,
       updateBoxTwoSettings,
       updateBoxThreeSettings,
       updateBoxFourSettings,
-      updateGreyScaleData,
       updateZoomLevel,
-      updateGreyScaleDataForRender,
     ],
   );
   return (
@@ -176,10 +141,10 @@ export default function Viz(props: Props) {
       <MainVisualization />
       <div
         style={{
-          backgroundColor: 'rgba(255,255,255,0.5)',
+          backgroundColor: 'rgba(255,255,255,1)',
           position: 'fixed',
           width: '100%',
-          height: '1px',
+          height: '2px',
           zIndex: '20',
           top: '50%',
           left: '0',
@@ -188,9 +153,9 @@ export default function Viz(props: Props) {
       />
       <div
         style={{
-          backgroundColor: 'rgba(255,255,255,0.5)',
+          backgroundColor: 'rgba(255,255,255,1)',
           position: 'fixed',
-          width: '1px',
+          width: '2px',
           height: '100vh',
           zIndex: '20',
           left: '50%',

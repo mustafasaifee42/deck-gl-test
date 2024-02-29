@@ -1,15 +1,15 @@
 import DeckGL from '@deck.gl/react/typed';
-import { GridCellLayer } from '@deck.gl/layers/typed';
+import { GridCellLayer, BitmapLayer } from '@deck.gl/layers/typed';
 import { OrthographicView } from '@deck.gl/core/typed';
 import { useCallback, useContext, useState } from 'react';
 import Context from '../Context/Context';
 
 export default function BoxViews() {
   const {
-    boxOneMineralDataForRender,
-    boxTwoMineralDataForRender,
-    boxThreeMineralDataForRender,
-    boxFourMineralDataForRender,
+    boxOneMineralData,
+    boxTwoMineralData,
+    boxThreeMineralData,
+    boxFourMineralData,
     updateZoomLevel,
     updateClickedIndex,
   } = useContext(Context);
@@ -36,143 +36,56 @@ export default function BoxViews() {
     zoom: 2,
   };
   const layers = [
+    new BitmapLayer({
+      id: 'bg',
+      image: './imgs/greyScale.bmp',
+      opacity: 1,
+      bounds: [-11997 / 2, 6282 / 2, 11997 / 2, -6282 / 2],
+    }),
+    new BitmapLayer({
+      id: 'scanning-area-bg',
+      image: './imgs/scanningArea.png',
+      opacity: 0.2,
+      bounds: [-11997 / 2, 6282 / 2, 11997 / 2, -6282 / 2],
+    }),
     new GridCellLayer({
       id: 'layer-for-topLeft',
-      data: boxOneMineralDataForRender?.fullData,
+      data: boxOneMineralData?.dataForRender,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      cellSize: 0.1,
+      cellSize: 9,
       pickable: true,
-      fp64: false,
-      visible:
-        viewStates.topLeft.zoom > 5 && boxOneMineralDataForRender !== undefined,
+      visible: boxOneMineralData !== undefined,
     }),
     new GridCellLayer({
       id: 'layer-for-topRight',
-      data: boxTwoMineralDataForRender?.fullData,
+      data: boxTwoMineralData?.dataForRender,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      cellSize: 0.1,
+      cellSize: 9,
       pickable: true,
       fp64: false,
-      visible:
-        viewStates.topLeft.zoom > 5 && boxTwoMineralDataForRender !== undefined,
+      visible: boxTwoMineralData !== undefined,
     }),
     new GridCellLayer({
       id: 'layer-for-bottomLeft',
-      data: boxThreeMineralDataForRender?.fullData,
+      data: boxThreeMineralData?.dataForRender,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      cellSize: 0.1,
+      cellSize: 9,
       pickable: true,
       fp64: false,
-      visible:
-        viewStates.topLeft.zoom > 5 &&
-        boxThreeMineralDataForRender !== undefined,
+      visible: boxThreeMineralData !== undefined,
     }),
     new GridCellLayer({
       id: 'layer-for-bottomRight',
-      data: boxFourMineralDataForRender?.fullData,
+      data: boxFourMineralData?.dataForRender,
       getPosition: d => d.position,
       getFillColor: d => d.color,
-      cellSize: 0.1,
+      cellSize: 9,
       pickable: true,
       fp64: false,
-      visible:
-        viewStates.topLeft.zoom > 5 &&
-        boxFourMineralDataForRender !== undefined,
-    }),
-    new GridCellLayer({
-      id: 'down-sampled-level-1-layer-for-topLeft',
-      data: boxOneMineralDataForRender?.downSampledDataLevel1,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      cellSize: 0.2,
-      pickable: true,
-      visible:
-        viewStates.topLeft.zoom <= 5 &&
-        viewStates.topLeft.zoom > 3.5 &&
-        boxOneMineralDataForRender !== undefined,
-    }),
-    new GridCellLayer({
-      id: 'down-sampled-level-1-layer-for-topRight',
-      data: boxTwoMineralDataForRender?.downSampledDataLevel1,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      cellSize: 0.2,
-      pickable: true,
-      visible:
-        viewStates.topLeft.zoom <= 5 &&
-        viewStates.topLeft.zoom > 3.5 &&
-        boxTwoMineralDataForRender !== undefined,
-    }),
-    new GridCellLayer({
-      id: 'down-sampled-level-1-layer-for-bottomLeft',
-      data: boxThreeMineralDataForRender?.downSampledDataLevel1,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      cellSize: 0.2,
-      pickable: true,
-      visible:
-        viewStates.topLeft.zoom <= 5 &&
-        viewStates.topLeft.zoom > 3.5 &&
-        boxThreeMineralDataForRender !== undefined,
-    }),
-    new GridCellLayer({
-      id: 'down-sampled-level-1-layer-for-bottomRight',
-      data: boxFourMineralDataForRender?.downSampledDataLevel1,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      cellSize: 0.2,
-      pickable: true,
-      visible:
-        viewStates.topLeft.zoom <= 5 &&
-        viewStates.topLeft.zoom > 3.5 &&
-        boxFourMineralDataForRender !== undefined,
-    }),
-    new GridCellLayer({
-      id: 'down-sampled-level-2-layer-for-topLeft',
-      data: boxOneMineralDataForRender?.downSampledDataLevel2,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      cellSize: 0.3,
-      pickable: true,
-      visible:
-        viewStates.topLeft.zoom <= 3.5 &&
-        boxOneMineralDataForRender !== undefined,
-    }),
-    new GridCellLayer({
-      id: 'down-sampled-level-2-layer-for-topRight',
-      data: boxTwoMineralDataForRender?.downSampledDataLevel2,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      cellSize: 0.3,
-      pickable: true,
-      visible:
-        viewStates.topLeft.zoom <= 3.5 &&
-        boxTwoMineralDataForRender !== undefined,
-    }),
-    new GridCellLayer({
-      id: 'down-sampled-level-2-layer-for-bottomLeft',
-      data: boxThreeMineralDataForRender?.downSampledDataLevel2,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      cellSize: 0.3,
-      pickable: true,
-      visible:
-        viewStates.topLeft.zoom <= 3.5 &&
-        boxThreeMineralDataForRender !== undefined,
-    }),
-    new GridCellLayer({
-      id: 'down-sampled-level-2-layer-for-bottomRight',
-      data: boxFourMineralDataForRender?.downSampledDataLevel2,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      cellSize: 0.3,
-      pickable: true,
-      visible:
-        viewStates.topLeft.zoom <= 3.5 &&
-        boxFourMineralDataForRender !== undefined,
+      visible: boxFourMineralData !== undefined,
     }),
   ];
   const views = [
@@ -231,8 +144,8 @@ export default function BoxViews() {
       layerFilter={({ layer, viewport }) => {
         return (
           layer.id === `layer-for-${viewport.id}` ||
-          layer.id === `down-sampled-level-2-layer-for-${viewport.id}` ||
-          layer.id === `down-sampled-level-1-layer-for-${viewport.id}`
+          layer.id === 'bg' ||
+          layer.id === 'scanning-area-bg'
         );
       }}
       onViewStateChange={onViewStateChange}
