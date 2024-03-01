@@ -46,7 +46,7 @@ export default function Viz(props: Props) {
       threshold: [0, 1],
     },
     menuCollapsed: false,
-    layout: 2,
+    layout: 4,
   };
 
   const [state, dispatch] = useReducer(Reducer, initialState);

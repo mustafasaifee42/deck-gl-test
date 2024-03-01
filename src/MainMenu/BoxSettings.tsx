@@ -86,7 +86,8 @@ export default function BoxSettings(props: Props) {
               }}
             />
           </div>
-          {boxSettings.name === 'GreyScale' ? null : (
+          {boxSettings.name === 'GreyScale' ||
+          boxSettings.name === 'MineralMap' ? null : (
             <div>
               <p
                 style={{

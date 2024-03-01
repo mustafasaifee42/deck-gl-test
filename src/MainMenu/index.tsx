@@ -34,6 +34,7 @@ const UpdateBoxData = (
             threshold,
             COLOR_SCALES[COLOR_SCALES.findIndex(el => el.value === name)]
               .colors as [string, string],
+            data.mineral_class_index,
           ) as DataFormattedType[];
           updateFunction({ data, dataForRender: fullData });
         },

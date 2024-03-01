@@ -9,12 +9,13 @@ export interface DataType {
   res_x: number;
   res_y: number;
   data: number[];
+  mineral_class_index?: string[];
 }
 
 export interface DataFormattedType {
   position: [number, number];
   color: number[];
-  value: number;
+  value: string | number;
   arrayIndex: number;
 }
 

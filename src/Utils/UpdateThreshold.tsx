@@ -12,6 +12,11 @@ export const UpdateThreshold: (
 ) => {
   return {
     data: data.data,
-    dataForRender: FormatData(data.data, thresholdValue, colors),
+    dataForRender: FormatData(
+      data.data,
+      thresholdValue,
+      colors,
+      data.data.mineral_class_index,
+    ),
   };
 };
