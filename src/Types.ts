@@ -1,3 +1,10 @@
+export interface BoxMetaDataType {
+  res_x: number;
+  res_y: number;
+  box_name: string;
+  box_number: number;
+}
+
 export interface DataType {
   res_x: number;
   res_y: number;
@@ -5,15 +12,10 @@ export interface DataType {
 }
 
 export interface DataFormattedType {
-  position: Float32Array;
-  color: Float32Array;
-  value: Float32Array;
-}
-
-export interface MineralDataType {
-  downSampledDataLevel1: DataType;
-  downSampledDataLevel2: DataType;
-  fullData: DataType;
+  position: [number, number];
+  color: number[];
+  value: number;
+  arrayIndex: number;
 }
 
 export interface MineralDataTypeForRender {
@@ -31,9 +33,19 @@ export interface MineralSettingsDataType {
   threshold: [number, number];
 }
 
+export interface MouseOverDataType {
+  index: number;
+  position: [number, number];
+  mouseX: number;
+  mouseY: number;
+}
+
 export interface StateDataType {
-  clickedIndex: number;
+  mouseOverData?: MouseOverDataType;
   zoomLevel: number;
+  stripOpacity: number;
+  boxOpacity: number;
+  boxMetaData: BoxMetaDataType;
   boxOneMineralData?: MineralDataTypeForRender;
   boxTwoMineralData?: MineralDataTypeForRender;
   boxThreeMineralData?: MineralDataTypeForRender;
@@ -42,11 +54,16 @@ export interface StateDataType {
   boxTwoSettings: BoxSettingsDataType;
   boxThreeSettings: BoxSettingsDataType;
   boxFourSettings: BoxSettingsDataType;
+  menuCollapsed: boolean;
+  layout: number;
 }
 
 export interface CtxDataType extends StateDataType {
   updateZoomLevel: (_d: number) => void;
-  updateClickedIndex: (_d: number) => void;
+  updateMouseOverData: (_d?: MouseOverDataType) => void;
+  updateStripOpacity: (_d: number) => void;
+  updateBoxOpacity: (_d: number) => void;
+  updateLayout: (_d: number) => void;
   updateBoxOneMineralData: (_d?: MineralDataTypeForRender) => void;
   updateBoxTwoMineralData: (_d?: MineralDataTypeForRender) => void;
   updateBoxThreeMineralData: (_d?: MineralDataTypeForRender) => void;
@@ -55,4 +72,5 @@ export interface CtxDataType extends StateDataType {
   updateBoxTwoSettings: (_d: BoxSettingsDataType) => void;
   updateBoxThreeSettings: (_d: BoxSettingsDataType) => void;
   updateBoxFourSettings: (_d: BoxSettingsDataType) => void;
+  updateMenuCollapsed: (_d: boolean) => void;
 }

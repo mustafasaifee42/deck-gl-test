@@ -1,15 +1,21 @@
-import BoxViews from './BoxViews';
+/* eslint-disable react/jsx-no-useless-fragment */
+import { useContext } from 'react';
+import BoxViewsFourBoxes from './BoxViewsFourBoxes';
+import Context from '../Context/Context';
+import BoxViewsTwoBoxes from './BoxViewsTwoBoxes';
+import BoxViewsOneBox from './BoxViewsOneBox';
 
 export default function MainVisualization() {
+  const { layout } = useContext(Context);
   return (
-    <div
-      id='main-viz'
-      style={{
-        backgroundColor: '#191933',
-        height: '100vh',
-      }}
-    >
-      <BoxViews />
-    </div>
+    <>
+      {layout === 4 ? (
+        <BoxViewsFourBoxes />
+      ) : layout === 2 ? (
+        <BoxViewsTwoBoxes />
+      ) : (
+        <BoxViewsOneBox />
+      )}
+    </>
   );
 }

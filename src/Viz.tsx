@@ -2,17 +2,29 @@ import { useReducer, useMemo } from 'react';
 import MainMenu from './MainMenu';
 import MainVisualization from './MainVisualization';
 import {
+  BoxMetaDataType,
   BoxSettingsDataType,
   MineralDataTypeForRender,
+  MouseOverDataType,
   StateDataType,
 } from './Types';
 import Context from './Context/Context';
 import Reducer from './Context/Reducer';
+import Overlay from './Overlay';
+import InfoBox from './InfoBox';
 
-export default function Viz() {
+interface Props {
+  boxMetaData: BoxMetaDataType;
+}
+
+export default function Viz(props: Props) {
+  const { boxMetaData } = props;
   const initialState: StateDataType = {
-    clickedIndex: -1,
+    mouseOverData: undefined,
     zoomLevel: 2,
+    stripOpacity: 1,
+    boxOpacity: 1,
+    boxMetaData,
     boxOneMineralData: undefined,
     boxTwoMineralData: undefined,
     boxThreeMineralData: undefined,
@@ -33,6 +45,8 @@ export default function Viz() {
       name: 'Aluminum',
       threshold: [0, 1],
     },
+    menuCollapsed: false,
+    layout: 2,
   };
 
   const [state, dispatch] = useReducer(Reducer, initialState);
@@ -93,9 +107,9 @@ export default function Viz() {
     });
   };
 
-  const updateClickedIndex = (data?: number) => {
+  const updateMouseOverData = (data?: MouseOverDataType) => {
     dispatch({
-      type: 'UPDATE_CLICKED_INDEX',
+      type: 'UPDATE_MOUSE_OVER_DATA',
       payload: data,
     });
   };
@@ -107,10 +121,38 @@ export default function Viz() {
     });
   };
 
+  const updateStripOpacity = (data?: number) => {
+    dispatch({
+      type: 'UPDATE_STRIP_OPACITY',
+      payload: data,
+    });
+  };
+
+  const updateBoxOpacity = (data?: number) => {
+    dispatch({
+      type: 'UPDATE_BOX_OPACITY',
+      payload: data,
+    });
+  };
+
+  const updateLayout = (data: number) => {
+    dispatch({
+      type: 'UPDATE_LAYOUT',
+      payload: data,
+    });
+  };
+
+  const updateMenuCollapsed = (data: boolean) => {
+    dispatch({
+      type: 'UPDATE_MENU_COLLAPSED',
+      payload: data,
+    });
+  };
+
   const contextValue = useMemo(
     () => ({
       ...state,
-      updateClickedIndex,
+      updateMouseOverData,
       updateBoxOneMineralData,
       updateBoxTwoMineralData,
       updateBoxThreeMineralData,
@@ -120,10 +162,14 @@ export default function Viz() {
       updateBoxThreeSettings,
       updateBoxFourSettings,
       updateZoomLevel,
+      updateStripOpacity,
+      updateBoxOpacity,
+      updateMenuCollapsed,
+      updateLayout,
     }),
     [
       state,
-      updateClickedIndex,
+      updateMouseOverData,
       updateBoxOneMineralData,
       updateBoxTwoMineralData,
       updateBoxThreeMineralData,
@@ -133,36 +179,18 @@ export default function Viz() {
       updateBoxThreeSettings,
       updateBoxFourSettings,
       updateZoomLevel,
+      updateBoxOpacity,
+      updateStripOpacity,
+      updateMenuCollapsed,
+      updateLayout,
     ],
   );
   return (
     <Context.Provider value={contextValue}>
       <MainMenu />
       <MainVisualization />
-      <div
-        style={{
-          backgroundColor: 'rgba(255,255,255,1)',
-          position: 'fixed',
-          width: '100%',
-          height: '2px',
-          zIndex: '20',
-          top: '50%',
-          left: '0',
-          margin: 0,
-        }}
-      />
-      <div
-        style={{
-          backgroundColor: 'rgba(255,255,255,1)',
-          position: 'fixed',
-          width: '2px',
-          height: '100vh',
-          zIndex: '20',
-          left: '50%',
-          top: '0',
-          margin: 0,
-        }}
-      />
+      <Overlay />
+      <InfoBox />
     </Context.Provider>
   );
 }

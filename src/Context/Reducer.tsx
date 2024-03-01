@@ -5,6 +5,10 @@ export default (state: StateDataType, action: any) => {
   switch (action.type) {
     case 'UPDATE_ZOOM_LEVEL':
       return { ...state, zoomLevel: action.payload };
+    case 'UPDATE_STRIP_OPACITY':
+      return { ...state, stripOpacity: action.payload };
+    case 'UPDATE_BOX_OPACITY':
+      return { ...state, boxOpacity: action.payload };
     case 'UPDATE_BOX_ONE_MINERAL_DATA':
       return { ...state, boxOneMineralData: action.payload };
     case 'UPDATE_BOX_TWO_MINERAL_DATA':
@@ -21,8 +25,12 @@ export default (state: StateDataType, action: any) => {
       return { ...state, boxThreeSettings: action.payload };
     case 'UPDATE_BOX_FOUR_SETTINGS':
       return { ...state, boxFourSettings: action.payload };
-    case 'UPDATE_CLICKED_INDEX':
-      return { ...state, clickedIndex: action.payload };
+    case 'UPDATE_MOUSE_OVER_DATA':
+      return { ...state, mouseOverData: action.payload };
+    case 'UPDATE_MENU_COLLAPSED':
+      return { ...state, menuCollapsed: action.payload };
+    case 'UPDATE_LAYOUT':
+      return { ...state, layout: action.payload };
     default:
       return { ...state };
   }

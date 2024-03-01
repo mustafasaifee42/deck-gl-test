@@ -1,5 +1,6 @@
 import { scaleLinear } from 'd3-scale';
 import { DataType, DataFormattedType } from '../Types';
+import { SCALING_FACTOR } from '../Constants';
 
 export const FormatData = (
   data: DataType,
@@ -58,12 +59,14 @@ export const FormatData = (
             ];
 
       formattedData.push({
-        position: new Float32Array([
-          ((data.data[i] % data.res_y) - data.res_y / 2) * 9,
-          (Math.floor(data.data[i] / data.res_y) - data.res_x / 2) * 9,
-        ]),
-        value: new Float32Array([data.data[i + 1]]),
-        color: new Float32Array(color),
+        position: [
+          ((data.data[i] % data.res_y) - data.res_y / 2) * SCALING_FACTOR,
+          (Math.floor(data.data[i] / data.res_y) - data.res_x / 2) *
+            SCALING_FACTOR,
+        ],
+        value: data.data[i + 1],
+        color,
+        arrayIndex: data.data[i],
       });
     }
   }
