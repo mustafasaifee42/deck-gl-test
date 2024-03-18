@@ -1,27 +1,8 @@
-import { useEffect, useState } from 'react';
-import { queue } from 'd3-queue';
-import { json } from 'd3-request';
-import { BoxMetaDataType } from './Types';
-import Viz from './Viz';
+import { Route, Routes } from 'react-router-dom';
+import SingleBoxView from './SingleBoxView';
+import MultiBoxView from './MultiBoxView';
 
 export default function App() {
-  const [boxMetaData, setBoxMetaData] = useState<undefined | BoxMetaDataType>(
-    undefined,
-  );
-  useEffect(() => {
-    queue()
-      .defer(json, './data/BoxMetaData.json')
-      .await(
-        (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          err: any,
-          data: BoxMetaDataType,
-        ) => {
-          if (err) throw err;
-          setBoxMetaData(data);
-        },
-      );
-  }, []);
   return (
     <div
       style={{
@@ -31,7 +12,11 @@ export default function App() {
         display: 'flex',
       }}
     >
-      {boxMetaData ? <Viz boxMetaData={boxMetaData} /> : null}
+      <Routes>
+        <Route path='/' element={<MultiBoxView />} />
+        <Route path='/multi-box' element={<MultiBoxView />} />
+        <Route path='/single-box/:id' element={<SingleBoxView />} />
+      </Routes>
     </div>
   );
 }

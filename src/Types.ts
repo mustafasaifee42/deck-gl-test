@@ -75,3 +75,21 @@ export interface CtxDataType extends StateDataType {
   updateBoxFourSettings: (_d: BoxSettingsDataType) => void;
   updateMenuCollapsed: (_d: boolean) => void;
 }
+
+export interface MultiBoxMetaData {
+  id: string;
+  dimension: [number, number];
+  y_pos: number;
+}
+
+export interface MultiBoxStateDataType {
+  elements: string[];
+  multiBoxProfile: MultiBoxMetaData[];
+  menuCollapsed: boolean;
+  maxWidth: number;
+}
+
+export interface MultiBoxCtxDataType extends MultiBoxStateDataType {
+  updateElements: (_d: string[]) => void;
+  updateMenuCollapsed: (_d: boolean) => void;
+}
