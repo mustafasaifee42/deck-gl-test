@@ -80,16 +80,24 @@ export interface MultiBoxMetaData {
   id: string;
   dimension: [number, number];
   y_pos: number;
+  to: number;
+  from: number;
 }
 
 export interface MultiBoxStateDataType {
-  elements: string[];
   multiBoxProfile: MultiBoxMetaData[];
   menuCollapsed: boolean;
   maxWidth: number;
 }
 
 export interface MultiBoxCtxDataType extends MultiBoxStateDataType {
-  updateElements: (_d: string[]) => void;
   updateMenuCollapsed: (_d: boolean) => void;
+}
+
+export interface GlobalStateDataType {
+  elements: string[];
+}
+
+export interface GlobalCtxDataType extends GlobalStateDataType {
+  updateElements: (_d: string[]) => void;
 }

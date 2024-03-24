@@ -3,10 +3,11 @@ import { ChevronsLeft, Settings } from 'lucide-react';
 import { Select } from 'antd';
 import Context from '../Context/MultiBoxContext';
 import { MULTI_BOX_MINERAL_OPTIONS } from '../../Constants';
+import GlobalContext from '../../Context/GlobalContext';
 
 export default function MainMenu() {
-  const { updateMenuCollapsed, menuCollapsed, updateElements, elements } =
-    useContext(Context);
+  const { updateMenuCollapsed, menuCollapsed } = useContext(Context);
+  const { elements, updateElements } = useContext(GlobalContext);
 
   return (
     <div>

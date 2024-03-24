@@ -14,20 +14,12 @@ export default function Viz(props: Props) {
   const { boxMetaData } = props;
 
   const initialState: MultiBoxStateDataType = {
-    elements: [],
     multiBoxProfile: boxMetaData,
     menuCollapsed: false,
     maxWidth: maxBy(boxMetaData, d => d.dimension[0])?.dimension[0] || 0,
   };
 
   const [state, dispatch] = useReducer(Reducer, initialState);
-
-  const updateElements = (data?: string[]) => {
-    dispatch({
-      type: 'UPDATE_ELEMENTS',
-      payload: data,
-    });
-  };
 
   const updateMenuCollapsed = (data: boolean) => {
     dispatch({
@@ -39,10 +31,9 @@ export default function Viz(props: Props) {
   const contextValue = useMemo(
     () => ({
       ...state,
-      updateElements,
       updateMenuCollapsed,
     }),
-    [state, updateElements, updateMenuCollapsed],
+    [state, updateMenuCollapsed],
   );
   return (
     <MultiBoxContext.Provider value={contextValue}>

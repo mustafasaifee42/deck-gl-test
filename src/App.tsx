@@ -1,8 +1,31 @@
 import { Route, Routes } from 'react-router-dom';
+import { useMemo, useReducer } from 'react';
 import SingleBoxView from './SingleBoxView';
 import MultiBoxView from './MultiBoxView';
+import Reducer from './Context/Reducer';
+import { GlobalStateDataType } from './Types';
+import GlobalContext from './Context/GlobalContext';
 
 export default function App() {
+  const initialState: GlobalStateDataType = {
+    elements: [],
+  };
+  const [state, dispatch] = useReducer(Reducer, initialState);
+
+  const updateElements = (data: string[]) => {
+    dispatch({
+      type: 'UPDATE_ELEMENTS',
+      payload: data,
+    });
+  };
+
+  const contextValue = useMemo(
+    () => ({
+      ...state,
+      updateElements,
+    }),
+    [state, updateElements],
+  );
   return (
     <div
       style={{
@@ -12,11 +35,13 @@ export default function App() {
         display: 'flex',
       }}
     >
-      <Routes>
-        <Route path='/' element={<MultiBoxView />} />
-        <Route path='/multi-box' element={<MultiBoxView />} />
-        <Route path='/single-box/:id' element={<SingleBoxView />} />
-      </Routes>
+      <GlobalContext.Provider value={contextValue}>
+        <Routes>
+          <Route path='/' element={<MultiBoxView />} />
+          <Route path='/multi-box' element={<MultiBoxView />} />
+          <Route path='/single-box/:id' element={<SingleBoxView />} />
+        </Routes>
+      </GlobalContext.Provider>
     </div>
   );
 }
