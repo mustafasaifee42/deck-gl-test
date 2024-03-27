@@ -3,7 +3,7 @@ import DeckGL from '@deck.gl/react/typed';
 import GL from '@luma.gl/constants';
 import { BitmapLayer, TextLayer } from '@deck.gl/layers/typed';
 import { OrthographicView } from '@deck.gl/core/typed';
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import flattenDeep from 'lodash.flattendeep';
 import { useNavigate } from 'react-router-dom';
 import Context from '../Context/MultiBoxContext';
@@ -12,14 +12,10 @@ import GlobalContext from '../../Context/GlobalContext';
 
 export default function MainVisualization() {
   const { multiBoxProfile, maxWidth } = useContext(Context);
-  const { elements } = useContext(GlobalContext);
+  const { elements, multiBoxViewState, updateMultiBoxViewState } =
+    useContext(GlobalContext);
 
   const SPACING_BETWEEN_COLUMNS = 200;
-  const INITIAL_VIEW_STATE = {
-    target: [0, 0],
-    zoom: 0.1,
-    parent: document.getElementById('viz-container') as HTMLElement,
-  };
   const navigate = useNavigate();
   const elementArr = [...elements];
   elementArr.unshift('profile');
@@ -171,10 +167,15 @@ export default function MainVisualization() {
       controller: true,
     }),
   ];
+  const onViewStateChange = useCallback((d: any) => {
+    const { viewState } = d;
+    updateMultiBoxViewState(viewState);
+  }, []);
   return (
     <DeckGL
       views={views}
-      initialViewState={INITIAL_VIEW_STATE}
+      initialViewState={multiBoxViewState}
+      onViewStateChange={onViewStateChange}
       controller
       layers={elementLayer}
       useDevicePixels={false}

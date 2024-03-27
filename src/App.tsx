@@ -3,12 +3,16 @@ import { useMemo, useReducer } from 'react';
 import SingleBoxView from './SingleBoxView';
 import MultiBoxView from './MultiBoxView';
 import Reducer from './Context/Reducer';
-import { GlobalStateDataType } from './Types';
+import { DeckGLStateDataType, GlobalStateDataType } from './Types';
 import GlobalContext from './Context/GlobalContext';
 
 export default function App() {
   const initialState: GlobalStateDataType = {
     elements: [],
+    multiBoxViewState: {
+      target: [0, 0],
+      zoom: 1,
+    },
   };
   const [state, dispatch] = useReducer(Reducer, initialState);
 
@@ -19,12 +23,20 @@ export default function App() {
     });
   };
 
+  const updateMultiBoxViewState = (data: DeckGLStateDataType) => {
+    dispatch({
+      type: 'UPDATE_MULTI_BOX_VIEW_STATE',
+      payload: data,
+    });
+  };
+
   const contextValue = useMemo(
     () => ({
       ...state,
       updateElements,
+      updateMultiBoxViewState,
     }),
-    [state, updateElements],
+    [state, updateElements, updateMultiBoxViewState],
   );
   return (
     <div

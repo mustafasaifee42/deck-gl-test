@@ -41,6 +41,11 @@ export interface MouseOverDataType {
   mouseY: number;
 }
 
+export interface DeckGLStateDataType {
+  target: [number, number];
+  zoom: number;
+}
+
 export interface StateDataType {
   mouseOverData?: MouseOverDataType;
   zoomLevel: number;
@@ -96,8 +101,10 @@ export interface MultiBoxCtxDataType extends MultiBoxStateDataType {
 
 export interface GlobalStateDataType {
   elements: string[];
+  multiBoxViewState: DeckGLStateDataType;
 }
 
 export interface GlobalCtxDataType extends GlobalStateDataType {
   updateElements: (_d: string[]) => void;
+  updateMultiBoxViewState: (_d: DeckGLStateDataType) => void;
 }

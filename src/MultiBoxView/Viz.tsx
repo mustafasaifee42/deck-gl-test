@@ -27,7 +27,6 @@ export default function Viz(props: Props) {
       payload: data,
     });
   };
-
   const contextValue = useMemo(
     () => ({
       ...state,
