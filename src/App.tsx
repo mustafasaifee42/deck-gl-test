@@ -11,7 +11,7 @@ export default function App() {
     elements: [],
     multiBoxViewState: {
       target: [0, 0],
-      zoom: 1,
+      zoom: -1,
     },
   };
   const [state, dispatch] = useReducer(Reducer, initialState);

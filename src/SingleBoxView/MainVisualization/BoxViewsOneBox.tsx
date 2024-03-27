@@ -22,12 +22,12 @@ export default function BoxViewsFourBox() {
   const [viewStates, setViewStates] = useState({
     top: {
       target: [0, 0],
-      zoom: 1,
+      zoom: 0.5,
     },
   });
   const INITIAL_VIEW_STATE = {
     target: [0, 0],
-    zoom: 1,
+    zoom: 0.5,
     parent: document.getElementById('viz-container') as HTMLElement,
   };
   const { id } = useParams();

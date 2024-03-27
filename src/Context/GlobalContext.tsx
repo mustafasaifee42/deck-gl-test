@@ -5,7 +5,7 @@ const GlobalContext = createContext<GlobalCtxDataType>({
   elements: [],
   multiBoxViewState: {
     target: [0, 0],
-    zoom: 1,
+    zoom: -0.5,
   },
   updateElements: (_d: string[]) => {},
   updateMultiBoxViewState: (_d: DeckGLStateDataType) => {},
