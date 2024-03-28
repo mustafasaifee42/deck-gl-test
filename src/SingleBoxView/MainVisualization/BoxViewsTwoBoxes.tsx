@@ -23,16 +23,16 @@ export default function BoxViewsTwoBoxes() {
   const [viewStates, setViewStates] = useState({
     top: {
       target: [0, 0],
-      zoom: -0.5,
+      zoom: -1,
     },
     bottom: {
       target: [0, 0],
-      zoom: -0.5,
+      zoom: -1,
     },
   });
   const INITIAL_VIEW_STATE = {
     target: [0, 0],
-    zoom: -0.5,
+    zoom: -1,
   };
   const { id } = useParams();
   const layers = [

@@ -25,24 +25,24 @@ export default function BoxViewsFourBoxes() {
   const [viewStates, setViewStates] = useState({
     topLeft: {
       target: [0, 0],
-      zoom: -0.5,
+      zoom: -1,
     },
     topRight: {
       target: [0, 0],
-      zoom: -0.5,
+      zoom: -1,
     },
     bottomLeft: {
       target: [0, 0],
-      zoom: -0.5,
+      zoom: -1,
     },
     bottomRight: {
       target: [0, 0],
-      zoom: -0.5,
+      zoom: -1,
     },
   });
   const INITIAL_VIEW_STATE = {
     target: [0, 0],
-    zoom: -0.5,
+    zoom: -1,
   };
   const { id } = useParams();
   const layers = [
