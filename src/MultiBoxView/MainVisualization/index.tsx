@@ -140,7 +140,7 @@ export default function MainVisualization() {
           color: [255, 255, 255],
           textAnchor: 'start',
           alignmentBaseline: 'bottom',
-          pixelSize: 24,
+          pixelSize: 20,
         },
       ]);
     }),
@@ -155,6 +155,7 @@ export default function MainVisualization() {
       getAlignmentBaseline: d => d.alignmentBaseline,
       sizeScale: 1,
       getSize: d => d.pixelSize,
+      visible: multiBoxViewState.zoom > -2.5,
     }),
   );
   const views = [
